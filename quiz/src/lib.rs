@@ -6,7 +6,7 @@
 // inside the zkVM.
 #![no_main]
 sp1_zkvm::entrypoint!(main);
-use alloy_sol_types::{sol, SolType};
+use alloy_sol_types::{sol, SolType, SolValue};
 use std::io;
 //use rand::prelude::*;
 use rand::Rng;
@@ -36,31 +36,31 @@ pub fn main() {
 
     // Parse values with error handling using `parse()`
     let max_difference: u32 = max_diff.trim().parse().expect("add the difference");
-    let user_amount_committed = user_amt_type.trim().parse().expect("add committed amount");
+    // let user_amount_committed = user_amt_type.trim().parse().expect("add committed amount");
     let dimensions = size.trim().parse().expect("Please type a dimensions");
 
-    let mut results: Vec<(i32, i32, bool)> = vec![];
-    let mut bomb_locations: Vec<(i32, i32)> = vec![];
+    let mut results: Vec<(u32, u32, bool)> = vec![];
+    let mut bomb_locations: Vec<(u32, u32)> = vec![];
 
     let mut random = rand::thread_rng();
-    let mut users_guess_state = vec![];
+    // let mut users_guess_state = vec![];
     let user_commit_amount = sp1_zkvm::io::read::<u8>;
 
-    let program_state;
+    // let program_state;
     let mut stored_bombs = vec![];
 
     let mut num_of_bomb: i32 = (dimensions as f32).sqrt() as i32;
     for i in 0..num_of_bomb {
         stored_bombs.push((
-            random.gen_range(0..dimensions),
-            random.gen_range(0..dimensions),
+            random.gen_range(0..dimensions) as u32,
+            random.gen_range(0..dimensions) as u32,
         ));
     }
     // do the tries and try to check the distance of the user guess n from the currently initialized bomb
 
     let mut a = 0;
     while a < max_tries {
-        let n = sp1_zkvm::io::read::<(i32, i32)>();
+        let n = sp1_zkvm::io::read::<(u32, u32)>();
         if n < (0, 0) {
             panic!("This program doesn't support negative numbers.");
         }
@@ -82,9 +82,13 @@ pub fn main() {
                 results.push(users_guess);
                 //sp1_zkvm::io::commit(&bytes);
             }
-            let bytes = ZkState::abi_encode(&(results, bomb_locations));
+            let state = ZkState {
+                stored_bombs: stored_bombs.clone(),
+                users_guess: results.clone(),
+            };
+            let bytes = state.abi_encode();
 
-            sp1_zkvm::io::commit(bytes)
+            sp1_zkvm::io::commit(&bytes);
         }
         a += 1;
     }
