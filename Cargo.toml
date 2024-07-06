@@ -6,4 +6,7 @@ edition = "2021"
 [dependencies]
 candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.6.0" }
 aligned-sdk = { git = "https://github.com/yetanotherco/aligned_layer" }
-clap = "4.5.8"
+clap = { version = "4.5.8", features=["derive"]}
+sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.7-testnet" }
+tiny-keccak = "2.0.2"
+
