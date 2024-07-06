@@ -68,6 +68,7 @@ const Game = () => {
                     onClick={() => {
                         setState("waiting");
                         setUI({ time: 0, flags: difficulty.mines });
+                        localStorage.setItem("isRestart", true.toString())
                     }}
                 >
                     <RestartIcon />

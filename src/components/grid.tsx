@@ -1,9 +1,37 @@
 import { RefObject, useEffect, useRef, useState } from "react";
 import Cell, { CellData } from "./cell";
 
+type betArray = [number, number][]
+const localStorageKey = "bet "
+
 const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStateUpdate, onSoundEvent }: GridProps) => {
 	const [data, setData] = useState<CellData[][]>([]);
 	const isFirstClick = useRef(true);
+
+
+	const [bet, setBet] = useState<betArray>(() => {
+		return []
+	})
+
+	useEffect(() => {
+		localStorage.setItem(localStorageKey, JSON.stringify(bet));
+	}, [bet])
+
+	const addBet = (newBet: [number, number]) => {
+
+		setBet(prevBet => {
+			const betExists = prevBet.some(bet => bet[0] === newBet[0] && bet[1] === newBet[1]);
+			if (betExists) {
+				return prevBet.filter(bet => bet[0] !== newBet[0] || bet[1] !== newBet[1]);
+			} else {
+				return [...prevBet, newBet];
+			}
+		});
+	};
+
+	const resetBet = () => {
+		setBet([]);
+	};
 
 	//Generate the grid for the game
 	useEffect(() => {
@@ -62,7 +90,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 		let newGrid = [...data];
 
 		//Left click
-		if (button === 0) {
+		if (false/*button === 0*/) {
 			if (cell.state !== "hidden") return;
 
 			if (isFirstClick.current) {
@@ -90,11 +118,15 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 			const state = checkGameState(newGrid);
 			if (state === "won") onStateUpdate("won");
 			setData(newGrid);
-		} else if (button === 2) {
-			//Right click
-			if (cell.state === "revealed" || isFirstClick.current) return;
-			const flags = data.flat().filter((cell) => cell.state === "flagged").length;
-			if (flags >= mines && cell.state === "hidden") return;
+		} else if (button === 0) {
+			if (localStorage.getItem("isRestart") == "true") {
+				localStorage.setItem("isRestart", false.toString())
+				resetBet()
+			}
+
+			addBet([cell.x, cell.y])
+
+			if (cell.state === "revealed") return;
 
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
 			onSoundEvent(cell.state === "flagged" ? "flag" : "unflag");
@@ -180,7 +212,7 @@ const getCellNeighbors = (cell: CellData, data: CellData[][]): CellData[] => {
 	return neighbors;
 };
 
-export type GameState = "playing" | "won" | "waiting"| "lost";
+export type GameState = "playing" | "won" | "waiting" | "lost";
 
 interface GridProps {
 	mines: number;
