@@ -23,3 +23,6 @@ ethers = { tag = "v2.0.15-fix-reconnections", features = ["ws", "rustls"], git =
 # SP1
 sp1-sdk = { git = "https://github.com/succinctlabs/sp1.git", rev = "v1.0.8-testnet" }
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.8-testnet" }
+
+[build-dependencies]
+sp1-helper = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.7-testnet" }
