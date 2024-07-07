@@ -1,7 +1,7 @@
 const Cell = ({ state, isMine, neighbors, larger, showMine, onClick }: CellProps) => {
 	const getCellContent = (state: CellState) => {
 		if (!isMine && state === "flagged" && showMine) return "❌";
-		if (state === "flagged") return "🚩";
+		if (state === "flagged") return "🪙";
 		if (isMine && (state === "revealed" || showMine)) return "💣";
 		if (state === "hidden") return "";
 		return neighbors || "";

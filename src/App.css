@@ -67,8 +67,8 @@
 }
 
 .cell:not(.empty, .filled):hover {
-	filter: brightness(90%);
-	transition: 0.2s;
+	filter: brightness(40%);
+	transition: 0.1s;
 }
 
 .cell.filled {
