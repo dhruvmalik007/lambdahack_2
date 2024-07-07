@@ -91,36 +91,8 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 		if (disabled) return;
 		let newGrid = [...data];
 
-		//Left click
-		if (false/*button === 0*/) {
-			if (cell.state !== "hidden") return;
+		if (button === 0) {
 
-			if (isFirstClick.current) {
-				isFirstClick.current = false;
-
-				cell.safe = true;
-				getCellNeighbors(cell, newGrid).forEach((neighbor) => (neighbor.safe = true));
-
-				newGrid = placeMines(newGrid);
-				newGrid = revealNeighbors(cell, newGrid);
-				setData(newGrid);
-				onSoundEvent("uncover")
-				onStateUpdate("playing");
-				return;
-			}
-
-			if (cell.isMine) {
-				newGrid[cell.y][cell.x].state = "revealed";
-				onStateUpdate("lost");
-			} else {
-				newGrid = [...revealNeighbors(cell, newGrid)];
-				onSoundEvent("uncover")
-			}
-
-			const state = checkGameState(newGrid);
-			if (state === "won") onStateUpdate("won");
-			setData(newGrid);
-		} else if (button === 0) {
 			if (localStorage.getItem("isRestart") == "true") {
 				localStorage.setItem("isRestart", false.toString())
 				resetBet()

@@ -1,4 +1,4 @@
-:root{
+:root {
 	--cell-font-size: 0px;
 }
 
@@ -44,13 +44,15 @@
 	width: 32px;
 	height: 32px;
 	font-size: calc(1.1rem + var(--cell-font-size));
-	background-color: #90ee90;
+	background-color: #c6312f;
 	transition: filter 0.15s ease-in-out, width 0.15s linear, height 0.15s linear;
 	cursor: pointer;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	font-weight: 600;
+	border: 1px solid white;
+	transition: 1.5s;
 }
 
 .larger {
@@ -61,11 +63,12 @@
 
 .row:nth-child(even) .cell:nth-child(odd),
 .row:nth-child(odd) .cell:nth-child(even) {
-	background-color: #76c376;
+	background-color: #303434;
 }
 
 .cell:not(.empty, .filled):hover {
 	filter: brightness(90%);
+	transition: 0.2s;
 }
 
 .cell.filled {
