@@ -1,22 +1,31 @@
-# Minesweeper
+# Newspaper React React FrontEnd
 
-This is a simple implementation of the classic game Minesweeper. It is written in TypeScript and uses React for the UI and Vite for bundling.
-You can play it  by clicking [here](https://mines.pkozak.org/).
 
-## About
+## 🛠️ Tech&Tolls used 
 
-This project was redone from scratch in React and Vite. This version is much cleaner and more modular. I also added a few features that were not in the original version like first-click safety.
+<img src="https://img.shields.io/badge/React-100000?style=for-the-badge&logo=React&logoColor=white" alt="GitHub" /><img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="HTML5" /><img src="https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E" alt="CSS" />
 
-I've returned to this project as I wanted to play minesweeper during boring lessons at school and want to make it a PWA, so I can play it offline.
-**_(And it was ugly)_**
+## Install and run on local
+1.  Clone this repository
+2.  Run ` $ npm install ` in terminal
 
-### Missing Features
+## ✒️ Autors
 
--   Unsolvable board detection - There is a chance that the board will be unsolvable. I have not implemented a way to detect this yet.
--   ~~Sound effects~~
--   ~~PWA offline support~~
--   Animations?
+- **Pol Montero** - Project Developer
+  - [GitHub](https://github.com/hypoldev) 
 
-## Credits and resources
-- A [paper](https://dspace.cvut.cz/bitstream/handle/10467/68632/F3-BP-2017-Cicvarek-Jan-Algorithms%20for%20Minesweeper%20Game%20Grid%20Generation.pdf?sequence=-1&isAllowed=y) on board generation by Jan Cicvárek
-- Big thanks to [Karol Walterowicz](https://www.instagram.com/tytikar/) for making sounds!
+## 🎓 Special Thanks
+
+- To **sponsonrs** for the trust, encouragement and knowledges to make us able to develop this last project.
+
+
+## 📄 Add Ons 
+
+- 
+
+## 🐛 Bugs  
+
+At the time of release:
+-  Post seeders are NOT complete, they lack images
+  
+
