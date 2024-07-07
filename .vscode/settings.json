@@ -1,6 +1,6 @@
 {
     "rust-analyzer.linkedProjects": [
-        "quiz/Cargo.toml",
+        "mine/Cargo.toml",
         "./Cargo.toml"
     ],
     "rust-analyzer.check.overrideCommand": [
