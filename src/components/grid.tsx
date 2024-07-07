@@ -23,6 +23,8 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 			const betExists = prevBet.some(bet => bet[0] === newBet[0] && bet[1] === newBet[1]);
 			if (betExists) {
 				return prevBet.filter(bet => bet[0] !== newBet[0] || bet[1] !== newBet[1]);
+			} else if (bet.length >= 10) {
+				return [...prevBet]
 			} else {
 				return [...prevBet, newBet];
 			}
@@ -126,7 +128,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 
 			addBet([cell.x, cell.y])
 
-			if (cell.state === "revealed") return;
+			if (bet.length === 10) return;
 
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
 			onSoundEvent(cell.state === "flagged" ? "flag" : "unflag");
