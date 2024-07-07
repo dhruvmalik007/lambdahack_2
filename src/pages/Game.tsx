@@ -176,8 +176,8 @@ const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 const difficulties: Difficulty[] = [
     { size: [10, 10], mines: 10, name: "beginner" },
-    { size: [16, 16], mines: 40, name: "intermediate" },
-    { size: [16, 30], mines: 99, name: "expert" }
+    { size: [10, 10], mines: 40, name: "intermediate" },
+    { size: [10, 30], mines: 99, name: "expert" }
 ];
 
 interface Difficulty {
