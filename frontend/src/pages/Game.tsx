@@ -20,6 +20,32 @@ const Game = () => {
     const [fontSize, setFontSize] = useState(parseInt(localStorage.getItem("fontSize") ?? "0"));
     const player = useRef(new AudioPlayer());
 
+    const [remaining, setRemaining] = useState<number>(10);
+
+    // Function to update the remaining count based on localStorage
+    const updateBet = () => {
+        const bet = localStorage.getItem('bet');
+        const betLength = bet ? JSON.parse(bet).length : 0;
+        setRemaining(betLength);
+        document.getElementById("buttonRemaining").innerHTML = `Bets remaining: ${10 - betLength}`
+    };
+
+    useEffect(() => {
+        // Update bet on initial render
+        updateBet();
+
+        // Add event listener to update bet when document is clicked
+        const handleClick = () => {
+            updateBet();
+        };
+        document.addEventListener('click', handleClick);
+
+        // Clean up the event listener on component unmount
+        return () => {
+            document.removeEventListener('click', handleClick);
+        };
+    }, []);
+
     useEffect(() => {
         //We can ignore the promises
         if (muted) {
@@ -61,6 +87,8 @@ const Game = () => {
                     <RestartIcon />
                     Restart
                 </button>
+                <button>BET</button>
+                <button id="buttonRemaining"></button>
             </div>
             <Grid
                 mines={difficulty.mines}

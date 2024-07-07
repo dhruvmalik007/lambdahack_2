@@ -2,7 +2,7 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import Cell, { CellData } from "./cell";
 
 type betArray = [number, number][]
-const localStorageKey = "bet "
+const localStorageKey = "bet"
 
 const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStateUpdate, onSoundEvent }: GridProps) => {
 	const [data, setData] = useState<CellData[][]>([]);
@@ -92,7 +92,6 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
 			onSoundEvent(cell.state === "flagged" ? "flag" : "unflag");
-			console.log(cell)
 		}
 	};
 
