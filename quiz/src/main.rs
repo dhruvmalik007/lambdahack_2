@@ -7,9 +7,6 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::{sol, SolValue};
-use std::io;
-//use rand::prelude::*;
-use rand::Rng;
 sol! {
     struct ZkState {
         tuple(uint32,uint32)[] stored_bombs;
@@ -24,37 +21,18 @@ pub fn main() {
     // from the prover.
     // set initial program state
     let max_tries = 10;
-    println!("enter the bounty that you want to commit with the max_difference");
 
-    let mut max_diff = String::new();
-    let mut user_amt_type = String::new();
-    let mut size = String::new();
-
-    io::stdin()
-        .read_line(&mut max_diff)
-        .expect("missing max difference");
-    io::stdin()
-        .read_line(&mut user_amt_type)
-        .expect("missing user amount committed");
-    io::stdin().read_line(&mut size).expect("missing size");
-
-    // let user_amount_committed = user_amt_type.trim().parse().expect("add committed amount");
-    let dimensions = size.trim().parse().expect("Please type a dimensions");
+    let size = sp1_zkvm::io::read::<u32>();
 
     let mut results: Vec<(u32, u32, bool)> = vec![];
     let mut bomb_locations: Vec<(u32, u32)> = vec![];
 
-    let mut random = rand::thread_rng();
-
     // let program_state;
     let mut stored_bombs = vec![];
 
-    let num_of_bomb: i32 = (dimensions as f32).sqrt() as i32;
+    let num_of_bomb: i32 = (size as f32).sqrt() as i32;
     for _ in 0..num_of_bomb {
-        stored_bombs.push((
-            random.gen_range(0..dimensions) as u32,
-            random.gen_range(0..dimensions) as u32,
-        ));
+        stored_bombs.push((1, 2));
     }
     // do the tries and try to check the distance of the user guess n from the currently initialized bomb
 
@@ -92,6 +70,4 @@ pub fn main() {
         }
         a += 1;
     }
-
-    print!("THE GAME IS OVER");
 }
