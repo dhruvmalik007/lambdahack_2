@@ -6,7 +6,7 @@
 // inside the zkVM.
 #![no_main]
 sp1_zkvm::entrypoint!(main);
-use alloy_sol_types::{sol, SolType, SolValue};
+use alloy_sol_types::{sol, SolValue};
 use std::io;
 //use rand::prelude::*;
 use rand::Rng;
@@ -30,12 +30,14 @@ pub fn main() {
     let mut user_amt_type = String::new();
     let mut size = String::new();
 
-    io::stdin().read_line(&mut max_diff);
-    io::stdin().read_line(&mut user_amt_type);
-    io::stdin().read_line(&mut size);
+    io::stdin()
+        .read_line(&mut max_diff)
+        .expect("missing max difference");
+    io::stdin()
+        .read_line(&mut user_amt_type)
+        .expect("missing user amount committed");
+    io::stdin().read_line(&mut size).expect("missing size");
 
-    // Parse values with error handling using `parse()`
-    let max_difference: u32 = max_diff.trim().parse().expect("add the difference");
     // let user_amount_committed = user_amt_type.trim().parse().expect("add committed amount");
     let dimensions = size.trim().parse().expect("Please type a dimensions");
 
@@ -43,14 +45,12 @@ pub fn main() {
     let mut bomb_locations: Vec<(u32, u32)> = vec![];
 
     let mut random = rand::thread_rng();
-    // let mut users_guess_state = vec![];
-    let user_commit_amount = sp1_zkvm::io::read::<u8>;
 
     // let program_state;
     let mut stored_bombs = vec![];
 
-    let mut num_of_bomb: i32 = (dimensions as f32).sqrt() as i32;
-    for i in 0..num_of_bomb {
+    let num_of_bomb: i32 = (dimensions as f32).sqrt() as i32;
+    for _ in 0..num_of_bomb {
         stored_bombs.push((
             random.gen_range(0..dimensions) as u32,
             random.gen_range(0..dimensions) as u32,

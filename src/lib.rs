@@ -2,7 +2,7 @@ use aligned_sdk::{
     sdk::submit,
     types::{ProvingSystemId, VerificationData},
 };
-use ethers::{signers::Signer, types::H160};
+use ethers::signers::Signer;
 
 pub mod ethereum;
 pub mod proof;
@@ -31,7 +31,7 @@ pub async fn pay_costs_and_submit_proof(
     };
 
     // Submit the proof to the batcher
-    let res = submit(BATCHER_URL, &verification_data, ethereum::WALLET.clone())
+    let _ = submit(BATCHER_URL, &verification_data, ethereum::WALLET.clone())
         .await
         .map_err(|e| anyhow::anyhow!("Failed to submit proof for verification: {:?}", e))?;
 
