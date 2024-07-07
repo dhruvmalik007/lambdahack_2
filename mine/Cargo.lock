@@ -959,7 +959,6 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
  "rand",
- "serde",
  "sp1-zkvm",
 ]
 
