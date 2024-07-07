@@ -1,7 +1,7 @@
 use rand::Rng;
 use sp1_sdk::{ProverClient, SP1Stdin};
 
-const ELF: &[u8] = include_bytes!("../../mine/elf/riscv32im-succinct-zkvm-elf");
+pub const ELF: &[u8] = include_bytes!("../../mine/elf/riscv32im-succinct-zkvm-elf");
 /// The size of the mine field. The amount of bombs is determined by the
 /// square root of the size. Here we get 3 bombs.
 const FIELD_SIZE: u8 = 10;
@@ -35,7 +35,9 @@ pub fn prove_mine_game(guesses: Vec<(u8, u8)>) -> anyhow::Result<Vec<u8>> {
 
     tracing::info!("Proving mine game with guesses: {:?}", guesses);
 
-    let proof = client.prove_compressed(&pk, input)?;
+    let proof = client.prove_compressed(&pk, input).inspect_err(|_| {
+        tracing::error!("Failed proving with guesses {guesses:?} and {bombs_location:?}")
+    })?;
 
     Ok(bincode::serialize(&proof)?)
 }
@@ -46,21 +48,15 @@ mod tests {
 
     #[test]
     fn test_prove_mine_game() {
-        let guesses = vec![
-            (0, 0),
-            (1, 1),
-            (2, 2),
-            (3, 3),
-            (2, 4),
-            (5, 4),
-            (6, 6),
-            (7, 4),
-            (8, 9),
-            (9, 9),
-        ];
+        crate::tests::setup();
 
+        // Given
+        let guesses = vec![(6, 6), (7, 4), (8, 9), (9, 9)];
+
+        // When
         let proof = prove_mine_game(guesses).unwrap();
 
+        // Then
         assert!(!proof.is_empty());
     }
 }

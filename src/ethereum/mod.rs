@@ -26,7 +26,7 @@ lazy_static! {
     pub static ref PROVIDER: Provider<Http> = {
         let rpc_url = Url::parse(&RPC_URL.clone()).unwrap();
         Provider::<Http>::try_from(rpc_url.as_str())
-        .expect("Failed to connect to provider")
+        .expect("failed to connect to provider")
     };
 
     /// A signer connected to the Ethereum network
@@ -60,30 +60,11 @@ pub async fn pay_batcher_costs(cost: u64) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use tracing_subscriber::{filter, util::SubscriberInitExt};
-
     use super::*;
-
-    fn setup() {
-        // Read the env
-        dotenv::dotenv().expect("Failed to read .env file");
-
-        // Set up the tracing
-        let filter = format!(
-            "mining={}",
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string())
-        );
-        let filter = filter::EnvFilter::new(filter);
-        tracing_subscriber::FmtSubscriber::builder()
-            .with_env_filter(filter)
-            .finish()
-            .try_init()
-            .expect("Failed to initialize tracing subscriber");
-    }
 
     #[tokio::test]
     async fn test_pay_batcher_costs() {
-        setup();
+        crate::tests::setup();
 
         // Given
         let cost = 1;
@@ -92,6 +73,6 @@ mod tests {
         // Then
         pay_batcher_costs(cost)
             .await
-            .expect("Failed to pay batcher costs")
+            .expect("failed to pay batcher costs")
     }
 }

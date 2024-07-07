@@ -30,7 +30,7 @@ pub fn main() {
 
     // Verify bounds
     for ((b_x, b_y), (u_x, u_y)) in stored_bombs.iter().zip(user_guesses.iter()) {
-        if *b_x >= size - 1 || *b_y >= size - 1 || *u_x >= size - 1 || *u_y >= size - 1 {
+        if *b_x > size - 1 || *b_y > size - 1 || *u_x > size - 1 || *u_y > size - 1 {
             panic!("Out of bounds");
         }
     }
