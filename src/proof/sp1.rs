@@ -1,6 +1,6 @@
 use sp1_sdk::{ProverClient, SP1Stdin};
 
-const ELF: &[u8] = include_bytes!("../../mine/program/elf/riscv32im-succinct-zkvm-elf");
+const ELF: &[u8] = include_bytes!("../../mine/elf/riscv32im-succinct-zkvm-elf");
 
 /// Returns a proof for the execution of the mine game with the given guesses,
 /// in the form of a serialized `Proof` struct.

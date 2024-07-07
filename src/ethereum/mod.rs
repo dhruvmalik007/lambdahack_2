@@ -13,6 +13,8 @@ const BATCHER_PAYMENTS_ADDRESS: &str = "0x815aeCA64a974297942D2Bbf034ABEe22a38A0
 const CHAIN_ID: u64 = 17000;
 
 lazy_static! {
+    pub static ref RPC_URL: String = std::env::var("RPC_URL").unwrap();
+
     /// Local signer for the application's wallet
     pub static ref WALLET: LocalWallet = {
         let mut wallet = LocalWallet::from_str(&std::env::var("PRIVATE_KEY").unwrap()).unwrap();
@@ -22,7 +24,7 @@ lazy_static! {
 
     /// Provider connected to the Ethereum network
     pub static ref PROVIDER: Provider<Http> = {
-        let rpc_url = Url::parse(&std::env::var("RPC_URL").unwrap()).unwrap();
+        let rpc_url = Url::parse(&RPC_URL.clone()).unwrap();
         Provider::<Http>::try_from(rpc_url.as_str())
         .expect("Failed to connect to provider")
     };
@@ -36,7 +38,7 @@ lazy_static! {
 
 /// Uses the application's wallet to pay the batcher costs
 pub async fn pay_batcher_costs(cost: u64) -> anyhow::Result<()> {
-    tracing::info!("Paying batcher costs {cost}");
+    tracing::info!("Paying batcher costs: {cost} wei");
 
     let tx = TransactionRequest {
         from: WALLET.address().into(),
@@ -49,12 +51,47 @@ pub async fn pay_batcher_costs(cost: u64) -> anyhow::Result<()> {
 
     let maybe_receipt = pending_tx.await?;
 
-    let receipt = maybe_receipt
-        .inspect(|receipt| tracing::info!("Batcher costs paid: {:?}", receipt.transaction_hash));
-
-    if receipt.is_none() {
-        anyhow::bail!("Failed to pay batcher costs");
-    }
+    maybe_receipt
+        .inspect(|receipt| tracing::info!("Batcher costs paid: {:?}", receipt.transaction_hash))
+        .ok_or(anyhow::anyhow!("Failed to pay batcher costs"))?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use tracing_subscriber::{filter, util::SubscriberInitExt};
+
+    use super::*;
+
+    fn setup() {
+        // Read the env
+        dotenv::dotenv().expect("Failed to read .env file");
+
+        // Set up the tracing
+        let filter = format!(
+            "mining={}",
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string())
+        );
+        let filter = filter::EnvFilter::new(filter);
+        tracing_subscriber::FmtSubscriber::builder()
+            .with_env_filter(filter)
+            .finish()
+            .try_init()
+            .expect("Failed to initialize tracing subscriber");
+    }
+
+    #[tokio::test]
+    async fn test_pay_batcher_costs() {
+        setup();
+
+        // Given
+        let cost = 1;
+
+        // When
+        // Then
+        pay_batcher_costs(cost)
+            .await
+            .expect("Failed to pay batcher costs")
+    }
 }
