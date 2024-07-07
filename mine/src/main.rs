@@ -5,17 +5,8 @@
 // Under the hood, we wrap your main function with some extra code so that it behaves properly
 // inside the zkVM.
 #![no_main]
+
 sp1_zkvm::entrypoint!(main);
-use alloy_sol_types::{sol, SolValue};
-
-sol! {
-    struct GameResult {
-        tuple(uint8, uint8)[] stored_bombs;
-        tuple(uint8, uint8)[] user_guesses;
-        bool hit;
-    }
-
-}
 
 pub fn main() {
     // Read an input to the program.
@@ -49,13 +40,5 @@ pub fn main() {
         }
     }
 
-    let game_result = GameResult {
-        stored_bombs,
-        user_guesses,
-        hit,
-    };
-    let bytes = game_result.abi_encode();
-
-    // TODO(greg) check if we need to commit to all this
-    sp1_zkvm::io::commit(&bytes);
+    sp1_zkvm::io::commit(&hit);
 }
