@@ -8,7 +8,10 @@ declare global {
     interface Window {
         ethereum?: {
             isMetaMask?: boolean;
-            request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown>;
+            request: (args: {
+                method: string;
+                params?: unknown[] | object;
+            }) => Promise<unknown>;
         };
     }
 }
@@ -17,7 +20,10 @@ declare global {
 const holeskyNetwork = {
     name: 'holesky',
     chainId: 17000,
-    _defaultProvider: (providers: any) => new providers.JsonRpcProvider('https://ethereum-holesky-rpc.publicnode.com'),
+    _defaultProvider: (providers: any) =>
+        new providers.JsonRpcProvider(
+            'https://ethereum-holesky-rpc.publicnode.com'
+        ),
 };
 
 const WalletButton: React.FC = () => {
@@ -28,7 +34,9 @@ const WalletButton: React.FC = () => {
         setIsLoading(true);
 
         if (!window.ethereum) {
-            alert('Please install MetaMask or another Ethereum wallet extension');
+            alert(
+                'Please install MetaMask or another Ethereum wallet extension'
+            );
             setIsLoading(false);
             return;
         }
@@ -40,7 +48,10 @@ const WalletButton: React.FC = () => {
             });
 
             // Use the properly defined Holesky network object here
-            const provider = new ethers.BrowserProvider(window.ethereum, holeskyNetwork);
+            const provider = new ethers.BrowserProvider(
+                window.ethereum,
+                holeskyNetwork
+            );
             const signer = await provider.getSigner();
             alert('Connected to Holesky testnet');
             navigate('/app');
@@ -53,8 +64,8 @@ const WalletButton: React.FC = () => {
     };
 
     return (
-        <div className='login'>
-            <button onClick={handleTransaction} disabled={isLoading} >
+        <div className="login">
+            <button onClick={handleTransaction} disabled={isLoading}>
                 {isLoading ? 'Processing...' : 'Login'}
             </button>
         </div>

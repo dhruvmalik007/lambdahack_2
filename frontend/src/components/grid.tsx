@@ -1,138 +1,151 @@
-import { RefObject, useEffect, useRef, useState } from "react";
-import Cell, { CellData } from "./cell";
+import { RefObject, useEffect, useRef, useState } from 'react';
+import Cell, { CellData } from './cell';
 
-type betArray = [number, number][]
-const localStorageKey = "bet"
+type betArray = [number, number][];
+const localStorageKey = 'bet';
 
-const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStateUpdate, onSoundEvent }: GridProps) => {
-	const [data, setData] = useState<CellData[][]>([]);
-	const isFirstClick = useRef(true);
+const Grid = ({
+    mines,
+    restartBtn,
+    size,
+    disabled,
+    showMines,
+    onUiUpdate,
+    onStateUpdate,
+    onSoundEvent,
+}: GridProps) => {
+    const [data, setData] = useState<CellData[][]>([]);
+    const isFirstClick = useRef(true);
 
+    const [bet, setBet] = useState<betArray>(() => {
+        return [];
+    });
 
-	const [bet, setBet] = useState<betArray>(() => {
-		return []
-	})
+    useEffect(() => {
+        localStorage.setItem(localStorageKey, JSON.stringify(bet));
+    }, [bet]);
 
-	useEffect(() => {
-		localStorage.setItem(localStorageKey, JSON.stringify(bet));
-	}, [bet])
+    const addBet = (newBet: [number, number]) => {
+        setBet((prevBet) => {
+            const betExists = prevBet.some(
+                (bet) => bet[0] === newBet[0] && bet[1] === newBet[1]
+            );
+            if (betExists) {
+                return prevBet.filter(
+                    (bet) => bet[0] !== newBet[0] || bet[1] !== newBet[1]
+                );
+            } else if (bet.length >= 10) {
+                return [...prevBet];
+            } else {
+                return [...prevBet, newBet];
+            }
+        });
+    };
 
-	const addBet = (newBet: [number, number]) => {
+    const resetBet = () => {
+        setBet([]);
+        return;
+    };
 
-		setBet(prevBet => {
-			const betExists = prevBet.some(bet => bet[0] === newBet[0] && bet[1] === newBet[1]);
-			if (betExists) {
-				return prevBet.filter(bet => bet[0] !== newBet[0] || bet[1] !== newBet[1]);
-			} else if (bet.length >= 10) {
-				return [...prevBet]
-			} else {
-				return [...prevBet, newBet];
-			}
-		});
-	};
+    //Generate the grid for the game
+    useEffect(() => {
+        isFirstClick.current = true;
+        constructGrid(size);
+    }, [size]);
 
-	const resetBet = () => {
-		setBet([]);
-		return;
-	};
+    useEffect(() => {
+        const resetBoard = () => {
+            isFirstClick.current = true;
+            constructGrid(size);
+        };
 
-	//Generate the grid for the game
-	useEffect(() => {
-		isFirstClick.current = true;
-		constructGrid(size);
-	}, [size]);
+        const button = restartBtn.current;
+        button?.addEventListener('click', resetBoard);
 
-	useEffect(() => {
-		const resetBoard = () => {
-			isFirstClick.current = true;
-			constructGrid(size);
-		};
+        return () => button?.removeEventListener('click', resetBoard);
+    }, [restartBtn, size]);
 
-		const button = restartBtn.current;
-		button?.addEventListener("click", resetBoard);
+    const constructGrid = (size: [number, number]) => {
+        const grid: CellData[][] = [];
+        for (let y = 0; y < size[0]; y++) {
+            grid.push([]);
+            for (let x = 0; x < size[1]; x++) {
+                grid[y].push({
+                    y,
+                    x,
+                    state: 'hidden',
+                    isMine: false,
+                    safe: false,
+                });
+            }
+        }
 
-		return () => button?.removeEventListener("click", resetBoard);
-	}, [restartBtn, size]);
+        setData(grid);
+    };
 
-	const constructGrid = (size: [number, number]) => {
-		const grid: CellData[][] = [];
-		for (let y = 0; y < size[0]; y++) {
-			grid.push([]);
-			for (let x = 0; x < size[1]; x++) {
-				grid[y].push({
-					y,
-					x,
-					state: "hidden",
-					isMine: false,
-					safe: false
-				});
-			}
-		}
+    //Mines are placed after the first click to prevent the first click from being a mine
 
-		setData(grid);
-	};
+    const handleCellClick = (cell: CellData, button: number) => {
+        let newGrid = [...data];
 
-	//Mines are placed after the first click to prevent the first click from being a mine
+        if (button === 0) {
+            if (localStorage.getItem('isRestart') == 'true') {
+                localStorage.setItem('isRestart', false.toString());
+                resetBet();
+            }
 
+            addBet([cell.x, cell.y]);
 
-	const handleCellClick = (cell: CellData, button: number) => {
+            if (bet.length === 10) return;
 
-		let newGrid = [...data];
+            newGrid[cell.y][cell.x].state =
+                cell.state === 'hidden' ? 'flagged' : 'hidden';
+            onSoundEvent(cell.state === 'flagged' ? 'flag' : 'unflag');
+        }
+    };
 
-		if (button === 0) {
-
-			if (localStorage.getItem("isRestart") == "true") {
-				localStorage.setItem("isRestart", false.toString())
-				resetBet()
-			}
-
-			addBet([cell.x, cell.y])
-
-			if (bet.length === 10) return;
-
-			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
-			onSoundEvent(cell.state === "flagged" ? "flag" : "unflag");
-		}
-	};
-
-
-
-	return (
-		<div className="grid">
-			{data.map((row, rowIndex) => {
-				return (
-					<div className="row" key={rowIndex}>
-						{row.map((cell, colIndex) => {
-							return (
-								<Cell
-									state={cell.state}
-									onClick={(button) => handleCellClick(cell, button)}
-									key={`${rowIndex}-${colIndex}`}
-									larger={size[0] == 10 && rowIndex <= 9 && colIndex <= 9}
-									neighbors={0}
-									showMine={showMines}
-									isMine={cell.isMine}
-								/>
-							);
-						})}
-					</div>
-				);
-			})}
-		</div>
-	);
+    return (
+        <div className="grid">
+            {data.map((row, rowIndex) => {
+                return (
+                    <div className="row" key={rowIndex}>
+                        {row.map((cell, colIndex) => {
+                            return (
+                                <Cell
+                                    state={cell.state}
+                                    onClick={(button) =>
+                                        handleCellClick(cell, button)
+                                    }
+                                    key={`${rowIndex}-${colIndex}`}
+                                    larger={
+                                        size[0] == 10 &&
+                                        rowIndex <= 9 &&
+                                        colIndex <= 9
+                                    }
+                                    neighbors={0}
+                                    showMine={showMines}
+                                    isMine={cell.isMine}
+                                />
+                            );
+                        })}
+                    </div>
+                );
+            })}
+        </div>
+    );
 };
 
-export type GameState = "playing" | "won" | "waiting" | "lost";
+export type GameState = 'playing' | 'won' | 'waiting' | 'lost';
 
 interface GridProps {
-	mines: number;
-	size: [number, number];
-	restartBtn: RefObject<HTMLButtonElement>;
-	disabled: boolean;
-	showMines: boolean;
-	onUiUpdate: (flags: number) => void;
-	onStateUpdate: (state: GameState) => void;
-	onSoundEvent: (event: "uncover" | "flag" | "unflag") => void;
+    mines: number;
+    size: [number, number];
+    restartBtn: RefObject<HTMLButtonElement>;
+    disabled: boolean;
+    showMines: boolean;
+    onUiUpdate: (flags: number) => void;
+    onStateUpdate: (state: GameState) => void;
+    onSoundEvent: (event: 'uncover' | 'flag' | 'unflag') => void;
 }
 
 export default Grid;
