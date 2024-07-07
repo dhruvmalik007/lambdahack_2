@@ -3268,6 +3268,7 @@ dependencies = [
  "dotenv",
  "ethers 2.0.14 (git+https://github.com/yetanotherco/ethers-rs.git?tag=v2.0.15-fix-reconnections)",
  "lazy_static",
+ "rand",
  "reqwest 0.12.5",
  "sp1-helper",
  "sp1-sdk",
@@ -5393,7 +5394,7 @@ dependencies = [
 [[package]]
 name = "sp1-helper"
 version = "0.1.0"
-source = "git+https://github.com/succinctlabs/sp1.git?tag=v1.0.7-testnet#b35be4200e7369bd987d8ba101f70dd7dec3df1a"
+source = "git+https://github.com/succinctlabs/sp1.git?tag=v1.0.8-testnet#14eb569d41d24721ffbd407d6060e202482d659c"
 dependencies = [
  "cargo_metadata",
  "chrono",

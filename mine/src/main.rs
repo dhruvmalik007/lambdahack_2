@@ -7,10 +7,12 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 use alloy_sol_types::{sol, SolValue};
+
 sol! {
-    struct ZkState {
-        tuple(uint32,uint32)[] stored_bombs;
-        tuple(uint32, uint32, bool)[] users_guess;
+    struct GameResult {
+        tuple(uint8, uint8)[] stored_bombs;
+        tuple(uint8, uint8)[] user_guesses;
+        bool hit;
     }
 
 }
@@ -22,52 +24,38 @@ pub fn main() {
     // set initial program state
     let max_tries = 10;
 
-    let size = sp1_zkvm::io::read::<u32>();
+    let size = sp1_zkvm::io::read::<u8>();
+    let stored_bombs = sp1_zkvm::io::read::<Vec<(u8, u8)>>();
+    let user_guesses = sp1_zkvm::io::read::<Vec<(u8, u8)>>();
 
-    let mut results: Vec<(u32, u32, bool)> = vec![];
-    let mut bomb_locations: Vec<(u32, u32)> = vec![];
-
-    // let program_state;
-    let mut stored_bombs = vec![];
-
-    let num_of_bomb: i32 = (size as f32).sqrt() as i32;
-    for _ in 0..num_of_bomb {
-        stored_bombs.push((1, 2));
-    }
-    // do the tries and try to check the distance of the user guess n from the currently initialized bomb
-
-    let mut a = 0;
-    while a < max_tries {
-        let n = sp1_zkvm::io::read::<(u32, u32)>();
-        if n < (0, 0) {
-            panic!("This program doesn't support negative numbers.");
+    // Verify bounds
+    for ((b_x, b_y), (u_x, u_y)) in stored_bombs.iter().zip(user_guesses.iter()) {
+        if *b_x >= size - 1 || *b_y >= size - 1 || *u_x >= size - 1 || *u_y >= size - 1 {
+            panic!("Out of bounds");
         }
-
-        for i in 0..num_of_bomb {
-            let (store_bomb_xpt, store_bomb_ypt) = stored_bombs[i as usize];
-
-            if store_bomb_xpt == n.0 && store_bomb_ypt == n.1 {
-                let users_guess = (n.0, n.1, false);
-                //let bytes = ZkState::abi_encode(&(users_guess, (store_bomb_xpt, store_bomb_ypt)));
-                bomb_locations.push((n.0, n.1));
-
-                results.push(users_guess);
-                // sp1_zkvm::io::commit(&bytes);
-            } else {
-                let users_guess = (n.0, n.1, true);
-                //let bytes = ZkState::abi_encode(&(users_guess, (store_bomb_xpt, store_bomb_ypt)));
-                bomb_locations.push((n.0, n.1));
-                results.push(users_guess);
-                //sp1_zkvm::io::commit(&bytes);
-            }
-            let state = ZkState {
-                stored_bombs: stored_bombs.clone(),
-                users_guess: results.clone(),
-            };
-            let bytes = state.abi_encode();
-
-            sp1_zkvm::io::commit(&bytes);
-        }
-        a += 1;
     }
+
+    // Check if the user has tried too many times
+    if user_guesses.len() > max_tries {
+        panic!("Too many tries");
+    }
+
+    // Iterate over the tries and check if the user has hit a bomb
+    let mut hit = false;
+    for g in user_guesses.iter() {
+        if stored_bombs.contains(g) {
+            hit = true;
+            break;
+        }
+    }
+
+    let game_result = GameResult {
+        stored_bombs,
+        user_guesses,
+        hit,
+    };
+    let bytes = game_result.abi_encode();
+
+    // TODO(greg) check if we need to commit to all this
+    sp1_zkvm::io::commit(&bytes);
 }
