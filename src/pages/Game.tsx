@@ -32,14 +32,6 @@ const Game = () => {
     }, [muted]);
 
     useEffect(() => {
-        timerRef.current = window.setInterval(() => {
-            if (state == "playing" && ui.time < 999) setUI((ui) => ({ ...ui, time: ui.time + 1 }));
-        }, 1000);
-
-        return () => clearInterval(timerRef.current);
-    }, [state, ui.time]);
-
-    useEffect(() => {
         if (state === "won") {
             jsConfetti.addConfetti();
             clearInterval(timerRef.current);
@@ -55,11 +47,6 @@ const Game = () => {
         }
     }, [state]);
 
-    useEffect(() => {
-        localStorage.setItem("fontSize", fontSize.toString());
-        document.documentElement.style.setProperty("--cell-font-size", `${fontSize}px`);
-    }, [fontSize]);
-
     return (
         <div className="App">
             <div className="infoBar">
@@ -74,39 +61,6 @@ const Game = () => {
                     <RestartIcon />
                     Restart
                 </button>
-                {/*
-				<div className="menu">
-					<Menu
-						menuButton={
-							<MenuButton>
-								<DownArrowIcon />
-								{capitalize(difficulty.name)}
-							</MenuButton>
-						}
-						transition
-					>
-						{difficulties.map((diff) => (
-							<MenuItem
-								key={diff.name}
-								disabled={diff.name === difficulty.name}
-								onClick={() => {
-									setUI({ time: 0, flags: diff.mines });
-									setState("playing");
-									setDifficulty(diff);
-								}}
-							>
-								{capitalize(diff.name)}
-							</MenuItem>
-						))}
-					</Menu>
-				</div> 
-				<div>
-					<ClockIcon />
-					<span className="label">{"0".repeat(3 - ui.time.toString().length) + ui.time}</span>
-				</div>
-
-				<span className="label">{`🚩 ${"0".repeat(difficulty.mines.toString().length - ui.flags.toString().length) + ui.flags}`}</span>
-			*/}
             </div>
             <Grid
                 mines={difficulty.mines}
@@ -145,21 +99,7 @@ const Game = () => {
                 <button className="musicBtn" onClick={() => setMuted(!muted)}>
                     <MusicIcon muted={muted} />
                 </button>
-                <button
-                    title="Increase font size"
-                    onClick={() => {
-                        if (fontSize < 10) {
-                            setFontSize(fontSize + 2);
-                        } else {
-                            setFontSize(0);
-                        }
-                    }}
-                    style={{
-                        fontSize: "18px"
-                    }}
-                >
-                    Aa
-                </button>
+
             </div>
 
             <footer>

@@ -33,6 +33,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 
 	const resetBet = () => {
 		setBet([]);
+		return;
 	};
 
 	//Generate the grid for the game
@@ -72,23 +73,10 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 	};
 
 	//Mines are placed after the first click to prevent the first click from being a mine
-	const placeMines = (grid: CellData[][]) => {
-		let minesPlaced = 0;
-		while (minesPlaced < mines) {
-			const y = Math.floor(Math.random() * size[0]);
-			const x = Math.floor(Math.random() * size[1]);
 
-			if (grid[y][x].isMine || grid[y][x].safe) continue;
-
-			grid[y][x].isMine = true;
-			minesPlaced++;
-		}
-
-		return grid;
-	};
 
 	const handleCellClick = (cell: CellData, button: number) => {
-		if (disabled) return;
+
 		let newGrid = [...data];
 
 		if (button === 0) {
@@ -104,26 +92,11 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 
 			newGrid[cell.y][cell.x].state = cell.state === "hidden" ? "flagged" : "hidden";
 			onSoundEvent(cell.state === "flagged" ? "flag" : "unflag");
-			const state = checkGameState(newGrid);
-
-			if (state === "won") onStateUpdate("won");
-			onUiUpdate(cell.state === "flagged" ? -1 : 1);
-			setData(newGrid);
+			console.log(cell)
 		}
 	};
 
-	const checkGameState = (grid: CellData[][]) => {
-		const flaggedCells: CellData[] = [];
-		for (const row of grid) {
-			for (const cell of row) {
-				if (cell.state === "flagged") flaggedCells.push(cell);
-				else if (cell.state === "hidden" && !cell.isMine) return "playing";
-			}
-		}
 
-		if (flaggedCells.filter((cell) => cell.isMine).length !== mines) return "playing";
-		return "won";
-	};
 
 	return (
 		<div className="grid">
@@ -137,7 +110,7 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 									onClick={(button) => handleCellClick(cell, button)}
 									key={`${rowIndex}-${colIndex}`}
 									larger={size[0] == 10 && rowIndex <= 9 && colIndex <= 9}
-									neighbors={getCellNeighbors(cell, data).filter((neighbor) => neighbor.isMine).length}
+									neighbors={0}
 									showMine={showMines}
 									isMine={cell.isMine}
 								/>
@@ -148,42 +121,6 @@ const Grid = ({ mines, restartBtn, size, disabled, showMines, onUiUpdate, onStat
 			})}
 		</div>
 	);
-};
-
-//Reveal cells around the clicked cell without neighbors nearby using recursion
-const revealNeighbors = (cell: CellData, grid: CellData[][]) => {
-	grid[cell.y][cell.x].state = "revealed";
-
-	const neighbors = getCellNeighbors(cell, grid);
-	if (neighbors.filter((neighbor) => neighbor.isMine).length > 0) return grid;
-
-	for (const neighbor of neighbors) {
-		if (neighbor.state === "hidden" && !neighbor.isMine) {
-			const neighborNeighbors = getCellNeighbors(neighbor, grid);
-			if (neighborNeighbors.filter((neighbor) => neighbor.isMine).length === 0) {
-				revealNeighbors(neighbor, grid);
-			} else {
-				grid[neighbor.y][neighbor.x].state = "revealed";
-			}
-		}
-	}
-
-	return grid;
-};
-
-//Get the neighbors of a cell
-const getCellNeighbors = (cell: CellData, data: CellData[][]): CellData[] => {
-	const neighbors: CellData[] = [];
-	//Get the cells above
-	for (let y = cell.y - 1; y <= cell.y + 1; y++) {
-		for (let x = cell.x - 1; x <= cell.x + 1; x++) {
-			if (y >= 0 && y < data.length && x >= 0 && x < data[0].length && !(y === cell.y && x === cell.x)) {
-				neighbors.push(data[y][x]);
-			}
-		}
-	}
-
-	return neighbors;
 };
 
 export type GameState = "playing" | "won" | "waiting" | "lost";
