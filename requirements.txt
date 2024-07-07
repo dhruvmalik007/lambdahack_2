@@ -1,0 +1,3 @@
+ekzl
+huggingface_hub
+streamlit
