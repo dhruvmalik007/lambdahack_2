@@ -80,8 +80,31 @@ const Game = () => {
         }
     }, [state]);
 
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const sendBet = async () => {
+        const positivefeedback = document.getElementById("positivefeedback")
+        const negativefeedback = document.getElementById("negativefeedback")
+        if (Math.random() < 0.3) {
+
+            const jsConfetti = new JSConfetti();
+            for (let i = 0; i < 6; i++) {
+                positivefeedback.innerHTML == "WIN" ? positivefeedback.innerHTML = "" : positivefeedback.innerHTML = "WIN"
+                jsConfetti.addConfetti()
+                await delay(200)
+            }
+        } else {
+            for (let i = 0; i < 6; i++) {
+                negativefeedback.innerHTML == "LOSE" ? negativefeedback.innerHTML = "" : negativefeedback.innerHTML = "LOSE"
+                await delay(200)
+            }
+        }
+    }
+
     return (
         <>
+            <div id="positivefeedback"></div>
+            <div id="negativefeedback"></div>
             <div className="App">
                 <div className="infoBar">
                     <button
@@ -103,7 +126,12 @@ const Game = () => {
                     <br />
                     <br />
                     <br />
-                    <button>BET</button>
+                    <button ref={restartBtn} onClick={() => {
+                        sendBet()
+                        setState("waiting");
+                        setUI({ time: 0, flags: difficulty.mines });
+                        localStorage.setItem("isRestart", true.toString())
+                    }}>BET</button>
                     <br />
                     <div className="">
                         <input

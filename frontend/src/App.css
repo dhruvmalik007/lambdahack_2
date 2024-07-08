@@ -106,3 +106,27 @@
 	width: 100%;
 	justify-content: center;
 }
+
+#positivefeedback {
+	position: fixed;
+	display: flex;
+	color: rgba(0, 196, 0, 0.708);
+	font-size: 100vh;
+	justify-content: center;
+	align-items: center;
+	z-index: 11;
+	height: 100%;
+	user-select: none;
+}
+
+#negativefeedback {
+	position: fixed;
+	display: flex;
+	color: rgba(208, 0, 0, 0.708);
+	font-size: 80vh;
+	justify-content: center;
+	align-items: center;
+	z-index: 11;
+	height: 100%;
+	user-select: none;
+}
