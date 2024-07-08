@@ -3,16 +3,17 @@
 }
 
 #root {
-	max-width: 1280px;
 	margin: 0 auto;
-	padding: 2rem;
 	text-align: center;
+	height: 100vh;
+	width: 100vw;
+	overflow-y: hidden;
+	background-color: black;
 }
 
 .grid {
 	user-select: none;
 	width: fit-content;
-	margin: auto;
 	position: relative;
 }
 
@@ -79,4 +80,22 @@
 .row:nth-child(even) .cell:nth-child(odd).filled,
 .row:nth-child(odd) .cell:nth-child(even).filled {
 	background-color: #d7b899;
+}
+
+.container {
+	background: url(/public/Background.png);
+	height: 100%;
+	background-size: 129.5em;
+	background-position-x: center;
+	background-position-y: -26em;
+	background-repeat: no-repeat;
+	background-color: black;
+}
+
+.App {
+	display: flex;
+	justify-content: center;
+	position: fixed;
+	width: 100%;
+	top: 9.5em;
 }

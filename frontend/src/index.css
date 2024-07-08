@@ -71,14 +71,16 @@ button:focus-visible {
 }
 
 .infoBar {
-    padding: 8px;
+    /* padding: 8px; */
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-width: 512px;
+    justify-content: space-around;
+    /* align-items: center; */
+    /* min-width: 512px; */
+    flex-direction: column-reverse;
+    width: 7.4em;
 }
 
-.infoBar > *:not(button, .menu) {
+.infoBar>*:not(button, .menu) {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -102,6 +104,6 @@ footer {
     box-sizing: border-box;
 }
 
-footer > * {
+footer>* {
     margin: 0;
 }
