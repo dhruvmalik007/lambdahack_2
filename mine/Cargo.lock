@@ -960,6 +960,7 @@ dependencies = [
  "alloy-sol-types",
  "rand",
  "sp1-zkvm",
+ "tiny-keccak",
 ]
 
 [[package]]

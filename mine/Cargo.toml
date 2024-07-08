@@ -8,3 +8,4 @@ edition = "2021"
 alloy-sol-types = "0.7.2"
 rand = "0.8.5"
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.7-testnet" }
+tiny-keccak = "2.0.2"

@@ -19,6 +19,7 @@ tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Ethereum
+alloy = { version = "0.1.2", features = ["full", "sol-types"] }
 ethers = { tag = "v2.0.15-fix-reconnections", features = [
   "ws",
   "rustls",

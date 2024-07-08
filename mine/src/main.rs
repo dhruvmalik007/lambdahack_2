@@ -9,6 +9,7 @@
 sp1_zkvm::entrypoint!(main);
 
 use alloy_sol_types::{sol, SolValue};
+use tiny_keccak::Hasher;
 
 sol! {
     /// Commitment to the game state
@@ -53,5 +54,11 @@ pub fn main() {
     }
     .abi_encode();
 
-    sp1_zkvm::io::commit(&bytes);
+    let mut hasher = tiny_keccak::Keccak::v256();
+    let mut output = [0; 32];
+    hasher.update(&bytes);
+    hasher.finalize(&mut output);
+
+    // Commit to the hash of the game outcome based on the user's guesses
+    sp1_zkvm::io::commit(&output);
 }
