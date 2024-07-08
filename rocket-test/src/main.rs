@@ -1,40 +1,45 @@
-#[macro_use] extern crate rocket;
-
+#[macro_use]
+extern crate rocket;
+use derive_adhoc::{define_derive_adhoc, Adhoc};
+use mining::proof::sp1;
 use rocket::serde::{json::Json, Serialize};
-use rocket_cors::{AllowedOrigins, CorsOptions, AllowedHeaders};
+use rocket::Response;
+use rocket_cors::{AllowedHeaders, AllowedMethods, AllowedOrigins, CorsOptions};
 
-#[derive(Serialize)]
-struct Message {
-    content: String,
+#[derive(serialize)]
+struct ResultGame {
+    result: bool,
 }
 
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
+#[get("/submit_proofs")]
+fn index(guesses: Vec<(u8, u8)>) -> Response<any, Error> {
+    sp1::prove_mine_game(guesses)
 }
 
-#[get("/json")]
-fn json() -> Json<Message> {
-    Json(Message {
-        content: "Hello, JSON!".to_string(),
-    })
+#[get("/get_result")]
+fn call_result_game() -> Response<Json<ResultGame>, Error> {
+    let result_game = ResultGame { result: 0 };
+    Ok(Json(result_game))
 }
 
 #[launch]
 fn rocket() -> _ {
-    let allowed_origins = AllowedOrigins::some_exact(&["http://localhost:5173"]);
+    let allowed_origins = AllowedOrigins::all();
 
-    let cors = CorsOptions {
-        allowed_origins,
-        allowed_methods: ["GET", "POST"].iter().cloned().map(From::from).collect(),
-        allowed_headers: AllowedHeaders::some(&["Authorization", "Accept", "Content-Type"]),
-        allow_credentials: true,
-        ..Default::default()
-    }
-    .to_cors()
-    .expect("error creating CORS");
+    let cors = AdHoc::on_ignite("CORS Config", |rocket| {
+        let allowed_origins = AllowedOrigins::all();
+        let cors = CorsOptions {
+            allowed_origins,
+            allowed_headers: AllowedHeaders::all(),
+            allow_credentials: true,
+            ..Default::default()
+        }
+        .to_cors()
+        .expect("error creating CORS");
+        Ok(rocket.manage(cors))
+    });
 
     rocket::build()
-        .mount("/", routes![index, json])
+        .mount("/submit_proofs", routes![index])
         .attach(cors)
 }
