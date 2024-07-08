@@ -52,7 +52,9 @@ pub async fn pay_batcher_costs(cost: u64) -> anyhow::Result<()> {
     let maybe_receipt = pending_tx.await?;
 
     maybe_receipt
-        .inspect(|receipt| tracing::info!("Batcher costs paid: {:?}", receipt.transaction_hash))
+        .inspect(|receipt| {
+            tracing::info!("Batcher costs paid at tx {:?}", receipt.transaction_hash)
+        })
         .ok_or(anyhow::anyhow!("Failed to pay batcher costs"))?;
 
     Ok(())
@@ -64,7 +66,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_pay_batcher_costs() {
-        crate::tests::setup();
+        // Setup
+        crate::utils::setup();
 
         // Given
         let cost = 1;

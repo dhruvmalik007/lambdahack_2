@@ -1,11 +1,12 @@
+pub mod ethereum;
+pub mod proof;
+pub mod utils;
+
 use aligned_sdk::{
     sdk::{submit, verify_proof_onchain},
     types::{AlignedVerificationData, Chain, ProvingSystemId, VerificationData},
 };
 use ethers::signers::Signer;
-
-pub mod ethereum;
-pub mod proof;
 
 const BATCHER_URL: &str = "wss://batcher.alignedlayer.com";
 const BATCHER_COST: u64 = 4e15 as u64;
@@ -72,38 +73,26 @@ pub async fn wait_for_proof_confirmation(
 pub mod tests {
     use super::*;
     use proof::sp1;
-    use tracing_subscriber::{filter, util::SubscriberInitExt};
-
-    pub fn setup() {
-        // Read the env
-        dotenv::dotenv().expect("failed to read .env file");
-
-        // Set up the tracing
-        let filter = format!(
-            "mining={}",
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string())
-        );
-        let filter = filter::EnvFilter::new(filter);
-        tracing_subscriber::FmtSubscriber::builder()
-            .with_env_filter(filter)
-            .finish()
-            .try_init()
-            .expect("failed to initialize tracing subscriber");
-    }
 
     #[tokio::test]
     async fn test_pay_costs_and_submit_proof() {
-        crate::tests::setup();
+        crate::utils::setup();
 
         // Given
-        let proof = sp1::prove_mine_game(vec![(0, 2), (1, 5)]).expect("failed to prove");
+        let serialized_proof = sp1::prove_mine_game(vec![(0, 2), (1, 5)]).expect("failed to prove");
+        let proof = bincode::deserialize::<sp1_sdk::SP1CompressedProof>(&serialized_proof)
+            .expect("failed to deserialize proof");
         let code = sp1::ELF.to_vec();
 
         // When
-        let verification_data =
-            pay_costs_and_submit_proof(proof.clone(), None, code, ProvingSystemId::SP1)
-                .await
-                .expect("failed to pay costs and submit proof");
+        let verification_data = pay_costs_and_submit_proof(
+            serialized_proof.clone(),
+            Some(proof.public_values.to_vec()),
+            code,
+            ProvingSystemId::SP1,
+        )
+        .await
+        .expect("failed to pay costs and submit proof");
 
         // Then
         wait_for_proof_confirmation(verification_data)

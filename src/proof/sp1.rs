@@ -44,11 +44,13 @@ pub fn prove_mine_game(guesses: Vec<(u8, u8)>) -> anyhow::Result<Vec<u8>> {
 
 #[cfg(test)]
 mod tests {
+    use tiny_keccak::Hasher;
+
     use super::*;
 
     #[test]
     fn test_prove_mine_game() {
-        crate::tests::setup();
+        crate::utils::setup();
 
         // Given
         let guesses = vec![(6, 6), (7, 4), (8, 9), (9, 9)];
@@ -58,5 +60,25 @@ mod tests {
 
         // Then
         assert!(!proof.is_empty());
+    }
+
+    #[test]
+    fn test_hash_elf() {
+        crate::utils::setup();
+
+        // Given
+        let elf = ELF;
+
+        // When
+        let mut hasher = tiny_keccak::Keccak::v256();
+        let mut output = [0u8; 32];
+        hasher.update(elf);
+        hasher.finalize(&mut output);
+
+        // Then
+        let hex = output
+            .into_iter()
+            .fold(String::new(), |acc, b| acc + &format!("{:02x}", b));
+        println!("{:x?}", hex);
     }
 }
