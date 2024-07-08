@@ -23,10 +23,6 @@ const Game = () => {
     const player = useRef(new AudioPlayer());
 
     const [remaining, setRemaining] = useState<number>(10);
-    //TODO: take the bet amount input
-    // const getBetAmt : any= (value: any) => {
-    //     setBetAmount(value);
-    // }
 
     // Function to update the remaining count based on localStorage
     const updateBet = () => {
@@ -41,26 +37,6 @@ const Game = () => {
         localStorage.setItem("betAmount", betAmount.toString())
         console.log(betAmount)
     }
-
-
-
-    // const callGuessMethod = async () => {
-    //     const guess = await fetch(
-    //         `https://localhost:${PORT}`,
-    //         {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({
-    //                 difficulty: difficulty.name,
-    //                 time: ui.time,
-    //                 flags: ui.flags,
-    //                 mines: difficulty.mines,
-    //             }),
-    //         }
-    //     );
-    // }
 
     useEffect(() => {
         // Update bet on initial render
@@ -122,11 +98,20 @@ const Game = () => {
                             localStorage.setItem("isRestart", true.toString())
                         }}
                     >
+                        <br />
+                        <br />
+                        <br />
+                        <br />
                         <RestartIcon />
                         Restart
                     </button>
                     <button onClick={() => { betFunction() }}>BET</button>
-                    <button id="buttonRemaining"></button>
+             <button id="buttonRemaining"></button>
+                    <br />
+                    <br />
+                    <br />
+                    <button>BET</button>
+                    <br />
                     <div className="">
                         <input
                             type="number"
@@ -135,6 +120,7 @@ const Game = () => {
                         />
                         <button type="button" onSubmit={/*getBetAmt*/ () => { console.log("bip") }} />
                     </div>
+                    <button>Amount</button>
                 </div>
 
 
@@ -179,13 +165,6 @@ const Game = () => {
 
             </div>
 
-            <footer>
-                v0.1
-                <span>
-                    <a href="#">Lambda Hackathon</a> - {new Date().getFullYear()}
-                </span>
-                <a href="https://github.com/UltimateDoge5/Minesweeper">Source code</a>
-            </footer>
         </>
 
     );

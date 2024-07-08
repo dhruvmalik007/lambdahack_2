@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createClient, http, parseEther } from 'viem';
-import { ethers } from 'ethers'
-import { holesky, mainnet, sepolia } from 'viem/chains';
-
+import { createClient, http } from 'viem';
+import { ethers } from 'ethers';
+import { holesky } from 'viem/chains'; // Ensure this import is correct
 
 declare global {
     interface Window {
@@ -13,6 +12,13 @@ declare global {
         };
     }
 }
+
+// Define the Holesky network object for ethers.js
+const holeskyNetwork = {
+    name: 'holesky',
+    chainId: 17000,
+    _defaultProvider: (providers: any) => new providers.JsonRpcProvider('https://ethereum-holesky-rpc.publicnode.com'),
+};
 
 const WalletButton: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -33,10 +39,11 @@ const WalletButton: React.FC = () => {
                 transport: http(),
             });
 
-            const provider = new ethers.BrowserProvider(window.ethereum, holesky);
+            // Use the properly defined Holesky network object here
+            const provider = new ethers.BrowserProvider(window.ethereum, holeskyNetwork);
             const signer = await provider.getSigner();
             alert('Connected to Holesky testnet');
-            navigate('/app'); 
+            navigate('/app');
         } catch (error) {
             console.error('Transaction failed:', error);
             alert('Transaction failed. Please try again.');
@@ -46,8 +53,8 @@ const WalletButton: React.FC = () => {
     };
 
     return (
-        <div>
-            <button onClick={handleTransaction} disabled={isLoading}>
+        <div className='login'>
+            <button onClick={handleTransaction} disabled={isLoading} >
                 {isLoading ? 'Processing...' : 'Login'}
             </button>
         </div>
