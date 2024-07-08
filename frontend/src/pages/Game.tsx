@@ -74,32 +74,34 @@ const Game = () => {
     }, [state]);
 
     return (
-        <div className="App">
-            <div className="infoBar">
-                <button
-                    ref={restartBtn}
-                    onClick={() => {
-                        setState("waiting");
-                        setUI({ time: 0, flags: difficulty.mines });
-                        localStorage.setItem("isRestart", true.toString())
-                    }}
-                >
-                    <RestartIcon />
-                    Restart
-                </button>
-                <button>BET</button>
-                <button id="buttonRemaining"></button>
+        <>
+            <div className="App">
+                <div className="infoBar">
+                    <button
+                        ref={restartBtn}
+                        onClick={() => {
+                            setState("waiting");
+                            setUI({ time: 0, flags: difficulty.mines });
+                            localStorage.setItem("isRestart", true.toString())
+                        }}
+                    >
+                        <RestartIcon />
+                        Restart
+                    </button>
+                    <button>BET</button>
+                    <button id="buttonRemaining"></button>
+                </div>
+                <Grid
+                    mines={difficulty.mines}
+                    size={difficulty.size}
+                    disabled={state === "won" || state === "lost"}
+                    showMines={state === "lost"}
+                    restartBtn={restartBtn}
+                    onUiUpdate={(flags) => setUI({ ...ui, flags: ui.flags + flags })}
+                    onStateUpdate={(state) => setState(state)}
+                    onSoundEvent={(sound) => player.current.play(sound)}
+                />
             </div>
-            <Grid
-                mines={difficulty.mines}
-                size={difficulty.size}
-                disabled={state === "won" || state === "lost"}
-                showMines={state === "lost"}
-                restartBtn={restartBtn}
-                onUiUpdate={(flags) => setUI({ ...ui, flags: ui.flags + flags })}
-                onStateUpdate={(state) => setState(state)}
-                onSoundEvent={(sound) => player.current.play(sound)}
-            />
 
             {(state === "won" || state === "lost") &&
                 createPortal(
@@ -137,7 +139,8 @@ const Game = () => {
                 </span>
                 <a href="https://github.com/UltimateDoge5/Minesweeper">Source code</a>
             </footer>
-        </div>
+        </>
+
     );
 };
 const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
