@@ -1,0 +1,8 @@
+[package]
+name = "rocket-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rocket = "0.5.0-rc.1"  # Check the latest version on crates.io
+
