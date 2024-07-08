@@ -6,6 +6,7 @@ import JSConfetti from "js-confetti";
 import AudioPlayer from "../components/audioPlayer";
 import { ClockIcon, DownArrowIcon, MusicIcon, RestartIcon } from "../components/icons";
 import "../App.css";
+import { getTest } from "../services/apiCalls";
 
 const jsConfetti = new JSConfetti();
 const initialMute = localStorage.getItem("muted") === null ? true : localStorage.getItem("muted") === "true";
@@ -101,6 +102,11 @@ const Game = () => {
         }
     }
 
+    const betFunction = async () => {
+        const response = await getTest()
+        console.log(response.body)
+    }
+
     return (
         <>
             <div id="positivefeedback"></div>
@@ -122,6 +128,7 @@ const Game = () => {
                         <RestartIcon />
                         Restart
                     </button>
+                    <button onClick={() => { betFunction(); sendBet() }}>BET</button>
                     <button id="buttonRemaining"></button>
                     <br />
                     <br />
