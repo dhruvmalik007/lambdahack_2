@@ -14,9 +14,7 @@ const initialMute = localStorage.getItem("muted") === null ? true : localStorage
 const App = () => {
 	return (
 		<>
-			<div className="container">
-				<Body />
-			</div>
+			<Body />
 		</>
 	)
 }
