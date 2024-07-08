@@ -39,13 +39,12 @@ h1 {
 }
 
 button {
-    border-radius: 8px;
-    border: 1px solid transparent;
+
     padding: 0.6em 1.2em;
     font-size: 1em;
     font-weight: 500;
     font-family: inherit;
-    background-color: #1a1a1a;
+    background-color: transparent;
     cursor: pointer;
     transition: border-color 0.25s;
     display: flex;
@@ -53,16 +52,13 @@ button {
     justify-content: center;
     gap: 8px;
     color: white;
+    border: 0;
 }
 
 button:hover {
     border-color: #646cff;
 }
 
-button:focus,
-button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-}
 
 .panel {
     position: absolute;
@@ -73,22 +69,11 @@ button:focus-visible {
 .infoBar {
     /* padding: 8px; */
     display: flex;
-    justify-content: space-around;
+    justify-content: start;
     /* align-items: center; */
     /* min-width: 512px; */
     flex-direction: column-reverse;
     width: 7.4em;
-}
-
-.infoBar>*:not(button, .menu) {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.5em;
-
-    background-color: #1a1a1a;
-    padding: 8px;
-    border-radius: 8px;
 }
 
 footer {
@@ -106,4 +91,11 @@ footer {
 
 footer>* {
     margin: 0;
+}
+
+input {
+    background-color: transparent;
+    width: 6rem;
+    height: 3rem;
+    font-size: larger;
 }

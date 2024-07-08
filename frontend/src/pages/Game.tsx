@@ -92,11 +92,19 @@ const Game = () => {
                             localStorage.setItem("isRestart", true.toString())
                         }}
                     >
+                        <br />
+                        <br />
+                        <br />
+                        <br />
                         <RestartIcon />
                         Restart
                     </button>
-                    <button>BET</button>
                     <button id="buttonRemaining"></button>
+                    <br />
+                    <br />
+                    <br />
+                    <button>BET</button>
+                    <br />
                     <div className="">
                         <input
                             type="number"
@@ -105,6 +113,7 @@ const Game = () => {
                         />
                         <button type="button" onSubmit={/*getBetAmt*/ () => { console.log("bip") }} />
                     </div>
+                    <button>Amount</button>
                 </div>
 
 
@@ -149,13 +158,6 @@ const Game = () => {
 
             </div>
 
-            <footer>
-                v0.1
-                <span>
-                    <a href="#">Lambda Hackathon</a> - {new Date().getFullYear()}
-                </span>
-                <a href="https://github.com/UltimateDoge5/Minesweeper">Source code</a>
-            </footer>
         </>
 
     );
