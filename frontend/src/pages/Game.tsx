@@ -18,10 +18,15 @@ const Game = () => {
     const [ui, setUI] = useState({ time: 0, flags: difficulty.mines });
     const [state, setState] = useState<GameState>("waiting");
     const [muted, setMuted] = useState(initialMute);
+   // const [betAmount, setBetAmount] = useState(0);
     const [fontSize, setFontSize] = useState(parseInt(localStorage.getItem("fontSize") ?? "0"));
     const player = useRef(new AudioPlayer());
 
     const [remaining, setRemaining] = useState<number>(10);
+    //TODO: take the bet amount input
+    // const getBetAmt : any= (value: any) => {
+    //     setBetAmount(value);
+    // }
 
     // Function to update the remaining count based on localStorage
     const updateBet = () => {
@@ -30,6 +35,26 @@ const Game = () => {
         setRemaining(betLength);
         document.getElementById("buttonRemaining").innerHTML = `Bets remaining: ${10 - betLength}`
     };
+
+
+
+    // const callGuessMethod = async () => {
+    //     const guess = await fetch(
+    //         `https://localhost:${PORT}`,
+    //         {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({
+    //                 difficulty: difficulty.name,
+    //                 time: ui.time,
+    //                 flags: ui.flags,
+    //                 mines: difficulty.mines,
+    //             }),
+    //         }
+    //     );
+    // }
 
     useEffect(() => {
         // Update bet on initial render
@@ -97,6 +122,18 @@ const Game = () => {
                     <button onClick={() => { betFunction() }}>BET</button>
                     <button id="buttonRemaining"></button>
                 </div>
+                <div className="">
+                        {/* <input
+                        type="number"
+                        min="10"
+                        onChange={(value) => setBetAmount(value)}
+                        >
+                           Add amount 
+                        </input> */}
+                    <button type="button" onSubmit={getBetAmt} />
+                </div>
+
+
                 <Grid
                     mines={difficulty.mines}
                     size={difficulty.size}
