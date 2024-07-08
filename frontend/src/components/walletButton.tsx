@@ -5,9 +5,6 @@ import { ethers } from 'ethers'
 import { holesky, mainnet, sepolia } from 'viem/chains';
 
 
-//let ethers = require('../../node_modules/ethers')
-
-// Add the global type declaration
 declare global {
     interface Window {
         ethereum?: {
@@ -36,24 +33,10 @@ const WalletButton: React.FC = () => {
                 transport: http(),
             });
 
-            const provider = new ethers.BrowserProvider(window.ethereum);
+            const provider = new ethers.BrowserProvider(window.ethereum, holesky);
             const signer = await provider.getSigner();
-
-            await provider.send('eth_requestAccounts', []);
-
-            const tx = {
-                to: await signer.getAddress(), // Replace with actual recipient address
-                value: parseEther("0.01"),
-                chainId: 5, // Holesky testnet chain ID
-            };
-
-            const transaction = await signer.sendTransaction(tx);
-            console.log('Transaction sent:', transaction);
-
-            await transaction.wait();
-            console.log('Transaction confirmed:', transaction);
-
-            navigate('/app'); // Replace with your target page
+            alert('Connected to Holesky testnet');
+            navigate('/app'); 
         } catch (error) {
             console.error('Transaction failed:', error);
             alert('Transaction failed. Please try again.');
@@ -65,7 +48,7 @@ const WalletButton: React.FC = () => {
     return (
         <div>
             <button onClick={handleTransaction} disabled={isLoading}>
-                {isLoading ? 'Processing...' : 'Pay with Crypto'}
+                {isLoading ? 'Processing...' : 'Login'}
             </button>
         </div>
     );
