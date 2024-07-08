@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.12;
 
-contract VerifierContract {
+contract EscrowContract {
     uint256 private _nextGameId;
 
     address public alignedServiceManager;
 
     /// The keccak 256 hash of the ELF bytecode.
-    bytes32 public elfCommitment = 0xe318613034c9e128c045beaeef47ce789528628d281eec1d1fa54988fa4f06f6;
+    bytes32 public elfCommitment = 0x59ccdc82ba96b96d1ebabcf00b867b3695767206e51361b70793ae225851c978;
 
-    struct GamePublicInputs {
+    struct GameOutcome {
         uint8[2][] user_guesses;
         bool won;
     }
@@ -35,18 +35,22 @@ contract VerifierContract {
     }
 
     /// Start a new game with the provided guesses
-    function startGame(uint8[2][] memory guesses) payable external returns(uint256) {
+    function startGame(uint8[2][] calldata guesses) payable external returns(uint256) {
         // Store the bet in the contract
         bets[_nextGameId] = Bet(msg.sender, msg.value, uint8(guesses.length), false);
 
         // Store the commitment in the contract by
         // hashing the guesses in order to keep a commitment to them
-        GamePublicInputs memory commitWon = GamePublicInputs(guesses, true);
-        GamePublicInputs memory commitLost = GamePublicInputs(guesses, false);
-        bytes32 guessesWinHash = keccak256(abi.encode(commitWon));
-        bytes32 guessesLostHash = keccak256(abi.encode(commitLost));
+        GameOutcome memory outcomeWin = GameOutcome(guesses, true);
+        GameOutcome memory outcomeLost = GameOutcome(guesses, false);
 
-        gameCommits[_nextGameId] = GameCommits(guessesWinHash, guessesLostHash);
+        bytes32 publicInputWon = keccak256(abi.encode(outcomeWin));
+        bytes32 publicInputLost = keccak256(abi.encode(outcomeLost));
+
+        bytes32 publicInputWonCommit = keccak256(abi.encode(publicInputWon));
+        bytes32 publicInputLostCommit = keccak256(abi.encode(publicInputLost));
+
+        gameCommits[_nextGameId] = GameCommits(publicInputWonCommit, publicInputLostCommit);
 
 
         // Return and increment the gameId
@@ -54,67 +58,59 @@ contract VerifierContract {
         return (_nextGameId - 1);
     }
 
+    struct SettlementInput {
+        uint256 gameId;
+        bool result;
+        bytes32[] proofCommitment;
+        bytes32 provingSystemAuxDataCommitment;
+        bytes20 proofGeneratorAddr;
+        bytes32[] batchMerkleRoot;
+        bytes[] merkleProof;
+        uint256[] verificationDataBatchIndex;
+    }
+
     /// Settle the bet for the provided gameId
-    function settleBet(
-        uint256 gameId,
-        bool result,
-        bytes32[] memory proofCommitment,
-        bytes32 provingSystemAuxDataCommitment,
-        bytes20 proofGeneratorAddr,
-        bytes32[] memory batchMerkleRoot,
-        bytes[] memory merkleProof,
-        uint256[] memory verificationDataBatchIndex
-    ) external {
-        require(elfCommitment == provingSystemAuxDataCommitment, "ELF does not match");
+    function settleBet(SettlementInput calldata input) external {
+        require(elfCommitment == input.provingSystemAuxDataCommitment, "ELF does not match");
 
         // Get the bet
-        Bet memory bet = bets[gameId];
+        Bet memory bet = bets[input.gameId];
         require(!bet.settled, "Bet already settled");
 
         // Get the commitments
-        GameCommits memory commits = gameCommits[gameId];
+        GameCommits memory commits = gameCommits[input.gameId];
         require(commits.Won != 0 && commits.Lost != 0, "Game not found");
 
         // Get the commitment based on the result
         bytes32 commitment;
-        if (result) {
+        if (input.result) {
             commitment = commits.Won;
         } else {
             commitment = commits.Lost;
         }
 
         // Check all proofs
-        for (uint256 i = 0; i < proofCommitment.length; i++) {
-            bool gameWon =
-                verifyBatchInclusion(
-                    proofCommitment[i],
-                    commitment,
-                    provingSystemAuxDataCommitment,
-                    proofGeneratorAddr,
-                    batchMerkleRoot[i],
-                    merkleProof[i],
-                    verificationDataBatchIndex[i]
-                );
+        for (uint256 i = 0; i < input.proofCommitment.length; i++) {
             // if verification fails, return early
-            if (!gameWon) {
+            if (!verifyBatchInclusion(
+                    input.proofCommitment[i],
+                    commitment,
+                    input.provingSystemAuxDataCommitment,
+                    input.proofGeneratorAddr,
+                    input.batchMerkleRoot[i],
+                    input.merkleProof[i],
+                    input.verificationDataBatchIndex[i]
+            )) {
                 return;
             }
         }
 
-        // Based on the result, pay out or take the funds
-        if (result) {
-            // Return winnings
-            uint256 winnings = bet.amount + bet.amount * 30/100 * bet.guessesCount;
-            // Transfer the funds to the user
-            payable(bet.user).transfer(winnings);
-        } else {
-            // Transfer the funds to the proof generator
-            payable(address(proofGeneratorAddr)).transfer(bet.amount);
-        }
+        // Payout the bet
+        _payout(input.result, input.gameId, address(input.proofGeneratorAddr));
 
         // Clean storage and mark the bet as settled
-        delete bets[gameId];
-        bets[gameId].settled = true;
+        delete bets[input.gameId];
+        bets[input.gameId].settled = true;
     }
 
     /// Verify the inclusion of a proof in a batch
@@ -126,7 +122,7 @@ contract VerifierContract {
         bytes32 batchMerkleRoot,
         bytes memory merkleProof,
         uint256 verificationDataBatchIndex
-    ) internal view returns (bool) {
+    ) public view returns (bool) {
         (bool callWasSuccessfull, bytes memory proofIsIncluded) = alignedServiceManager.staticcall(
             abi.encodeWithSignature(
                 "verifyBatchInclusion(bytes32,bytes32,bytes32,bytes20,bytes32,bytes,uint256)",
@@ -143,6 +139,21 @@ contract VerifierContract {
         bool proofIsIncludedBool = abi.decode(proofIsIncluded, (bool));
 
         return (callWasSuccessfull && proofIsIncludedBool);
+    }
+
+    function _payout(bool result, uint256 gameId, address proofGeneratorAddr) internal {
+        Bet memory bet = bets[gameId];
+
+        // Based on the result, pay out or take the funds
+        if (result) {
+            // Return winnings
+            uint256 winnings = bet.amount + bet.amount * 30/100 * bet.guessesCount;
+            // Transfer the funds to the user
+            payable(bet.user).transfer(winnings);
+        } else {
+            // Transfer the funds to the proof generator
+            payable(proofGeneratorAddr).transfer(bet.amount);
+        }
     }
 
     /// Default payable function
