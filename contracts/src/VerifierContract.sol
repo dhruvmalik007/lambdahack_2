@@ -6,43 +6,55 @@ contract VerifierContract {
 
     address public alignedServiceManager;
 
-    // TODO update this with the correct ELF commitment
-    bytes32 public elfCommitment = 0x35dd40ab04e180712996495caec915b8a7c488433acbb50c4d8d912cb55bf1f1;
+    /// The keccak 256 hash of the ELF bytecode.
+    bytes32 public elfCommitment = 0xe318613034c9e128c045beaeef47ce789528628d281eec1d1fa54988fa4f06f6;
 
-    // Map the gameId to the Bet
+    struct GamePublicInputs {
+        uint8[2][] user_guesses;
+        bool won;
+    }
+
+    /// Map the gameId to the Bet
     struct Bet {
         address user;
         uint256 amount;
-        bytes32 guessesWinCommitment;
-        bytes32 guessesLostCommitment;
         uint8 guessesCount;
         bool settled;
     }
     mapping(uint256 => Bet) public bets;
 
+    /// Map the gameId to the GameCommitment
+    struct GameCommits {
+        bytes32 Won;
+        bytes32 Lost;
+    }
+    mapping(uint256 => GameCommits) public gameCommits;
+
     constructor(address _alignedServiceManager) {
         alignedServiceManager = _alignedServiceManager;
     }
 
-    // Start a new game with the provided guesses
+    /// Start a new game with the provided guesses
     function startGame(uint8[2][] memory guesses) payable external returns(uint256) {
-        // Hash the guesses in order to keep a commitment to them
-        // TODO here we actually need to have a commitment to the public
-        // inputs of the proof, not the just the guesses
-        // Should be something like keccak256(abi.encodePacked(true, guesses))
-        // Should be something like keccak256(abi.encodePacked(false, guesses))
-        bytes32 guessesWinHash = keccak256(abi.encodePacked(guesses));
-        bytes32 guessesLostHash = keccak256(abi.encodePacked(guesses));
-
         // Store the bet in the contract
-        bets[_nextGameId] = Bet(msg.sender, msg.value, guessesWinHash, guessesLostHash, uint8(guesses.length), false);
+        bets[_nextGameId] = Bet(msg.sender, msg.value, uint8(guesses.length), false);
+
+        // Store the commitment in the contract by
+        // hashing the guesses in order to keep a commitment to them
+        GamePublicInputs memory commitWon = GamePublicInputs(guesses, true);
+        GamePublicInputs memory commitLost = GamePublicInputs(guesses, false);
+        bytes32 guessesWinHash = keccak256(abi.encode(commitWon));
+        bytes32 guessesLostHash = keccak256(abi.encode(commitLost));
+
+        gameCommits[_nextGameId] = GameCommits(guessesWinHash, guessesLostHash);
+
 
         // Return and increment the gameId
         _nextGameId++;
         return (_nextGameId - 1);
     }
 
-    // Settle the bet for the provided gameId
+    /// Settle the bet for the provided gameId
     function settleBet(
         uint256 gameId,
         bool result,
@@ -55,14 +67,20 @@ contract VerifierContract {
     ) external {
         require(elfCommitment == provingSystemAuxDataCommitment, "ELF does not match");
 
+        // Get the bet
         Bet memory bet = bets[gameId];
         require(!bet.settled, "Bet already settled");
 
+        // Get the commitments
+        GameCommits memory commits = gameCommits[gameId];
+        require(commits.Won != 0 && commits.Lost != 0, "Game not found");
+
+        // Get the commitment based on the result
         bytes32 commitment;
         if (result) {
-            commitment = bet.guessesWinCommitment;
+            commitment = commits.Won;
         } else {
-            commitment = bet.guessesLostCommitment;
+            commitment = commits.Lost;
         }
 
         // Check all proofs
@@ -90,15 +108,16 @@ contract VerifierContract {
             // Transfer the funds to the user
             payable(bet.user).transfer(winnings);
         } else {
+            // Transfer the funds to the proof generator
             payable(address(proofGeneratorAddr)).transfer(bet.amount);
         }
 
-        // Mark the bet as settled
+        // Clean storage and mark the bet as settled
         delete bets[gameId];
         bets[gameId].settled = true;
     }
 
-    // Verify the inclusion of a proof in a batch
+    /// Verify the inclusion of a proof in a batch
     function verifyBatchInclusion(
         bytes32 proofCommitment,
         bytes32 pubInputCommitment,
@@ -125,4 +144,7 @@ contract VerifierContract {
 
         return (callWasSuccessfull && proofIsIncludedBool);
     }
+
+    /// Default payable function
+    receive() external payable{}
 }
