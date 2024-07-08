@@ -53,8 +53,8 @@ const WalletButton: React.FC = () => {
     };
 
     return (
-        <div>
-            <button onClick={handleTransaction} disabled={isLoading}>
+        <div className='login'>
+            <button onClick={handleTransaction} disabled={isLoading} >
                 {isLoading ? 'Processing...' : 'Login'}
             </button>
         </div>

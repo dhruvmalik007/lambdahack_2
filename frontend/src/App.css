@@ -83,14 +83,13 @@
 }
 
 .container {
-	background: url(/Background.png);
+	background: url(./public/Background.png);
 	height: 100%;
-	background-size: 129.5em;
 	background-position-x: center;
-	background-position-y: -26em;
 	background-repeat: no-repeat;
 	background-color: black;
 }
+
 
 .App {
 	display: flex;
@@ -98,4 +97,14 @@
 	position: fixed;
 	width: 100%;
 	top: 9.5em;
+}
+
+.login {
+	position: relative;
+	display: flex;
+	top: 15em;
+	width: 100%;
+	justify-content: center;
+
+
 }
