@@ -9,7 +9,10 @@ rocket_cors = "0.5.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
-mining = { path="../" }
+mining = { path= "../" }
+mine = {path = "../mine"}
 
 ethers = { version = "2.0", features = ["legacy"] }
 derive-adhoc = "0.8.4"
+sha256 = "1.5.0"
+rs_merkle = "1.4.2"
