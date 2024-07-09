@@ -37,7 +37,13 @@ export class WalletService {
         const contract = new ethers.Contract(ContractAddress, ContractABI, this.signer);
 
         // Call a function from the contract (replace 'myFunction' and 'args' with your function and its arguments)
-        const data = contract.interface.encodeFunctionData(functionName, callData);
+        console.log("function name:");
+        console.log(functionName);
+        console.log("call data:");
+        console.log(callData);
+        const data = contract.interface.encodeFunctionData(functionName, [callData]);
+        console.log("encoded data:");
+        console.log(data);
 
         const tx = await this.signer.sendTransaction({
             to: ContractAddress,
