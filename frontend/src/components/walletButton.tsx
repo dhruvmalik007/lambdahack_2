@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createClient, http } from 'viem';
 import { ethers } from 'ethers';
 import { holesky } from 'viem/chains'; // Ensure this import is correct
+import {walletService} from "../services/walletService";
 
 declare global {
     interface Window {
@@ -55,7 +56,7 @@ const WalletButton: React.FC = () => {
 
     return (
         <div className='login'>
-            <button onClick={handleTransaction} disabled={isLoading} >
+            <button onClick={} disabled={isLoading} >
                 {isLoading ? 'Processing...' : 'Login'}
             </button>
         </div>
