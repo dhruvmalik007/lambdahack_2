@@ -13,6 +13,7 @@ dotenv = "0.15.0"
 lazy_static = "1.5.0"
 rand = "0.8.5"
 reqwest = "0.12.5"
+serde = { version = "1.0", features = ["derive"] }
 tiny-keccak = "2.0.2"
 tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
 tracing = { version = "0.1", default-features = false }
@@ -20,6 +21,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Ethereum
 alloy = { version = "0.1.2", features = ["full", "sol-types"] }
+alloy-sol-types = "0.7.2"
+alloy-contract = "0.1.4"
 ethers = { tag = "v2.0.15-fix-reconnections", features = [
   "ws",
   "rustls",
@@ -28,6 +31,16 @@ ethers = { tag = "v2.0.15-fix-reconnections", features = [
 # SP1
 sp1-sdk = { git = "https://github.com/succinctlabs/sp1.git", rev = "v1.0.8-testnet" }
 sp1-zkvm = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.8-testnet" }
+
+
+# Server
+derive-adhoc = "0.8.4"
+mongodb = { version = "3.0", default-features = false, features = [
+  "rustls-tls",
+  "compat-3-0-0",
+] }
+rocket = { version = "0.5.0-rc.1", features = ["json"] }
+rocket_cors = "0.5.2"
 
 [build-dependencies]
 sp1-helper = { git = "https://github.com/succinctlabs/sp1.git", tag = "v1.0.8-testnet" }
