@@ -7,15 +7,16 @@ use std::str::FromStr;
 
 use aligned_sdk::types::{AlignedVerificationData, ProvingSystemId};
 use alloy::{
-    network::Ethereum,
+    network::{Ethereum, EthereumWallet},
     primitives::{Address, Bytes, B256, U256},
     providers::{
-        fillers::{ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller},
+        fillers::{ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller, WalletFiller},
         Identity, ProviderBuilder, RootProvider,
     },
+    signers::local::PrivateKeySigner,
     transports::http::Http,
 };
-use alloy_sol_types::{sol, SolValue};
+use alloy_sol_types::sol;
 use mining::{pay_costs_and_submit_proof, proof::sp1, wait_for_proof_confirmation};
 use mongodb::{
     options::{DatabaseOptions, ReadConcern, WriteConcern},
@@ -25,12 +26,21 @@ use reqwest::{Client, Url};
 use rocket::{fairing::AdHoc, serde::json::Json};
 use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
 use serde::{Deserialize, Serialize};
-use tiny_keccak::Hasher;
-use Escrow::GameCommitment;
 
 sol!(
     #[sol(rpc)]
     contract Escrow {
+        struct SettlementInput {
+            uint256 gameId;
+            bool result;
+            bytes32[] proofCommitment;
+            bytes32 provingSystemAuxDataCommitment;
+            bytes20 proofGeneratorAddr;
+            bytes32[] batchMerkleRoot;
+            bytes[] merkleProof;
+            uint256[] verificationDataBatchIndex;
+        }
+        function settleBet(SettlementInput calldata input) external;
         function verifyBatchInclusion(
             bytes32 proofCommitment,
             bytes32 pubInputCommitment,
@@ -49,20 +59,23 @@ sol!(
     }
 );
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Guesses {
     guesses: Vec<(u8, u8)>,
     game_id: u128,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct GameVerificationData {
     data: AlignedVerificationData,
     game: Guesses,
 }
 
 type AlloyProvider = FillProvider<
-    JoinFill<JoinFill<JoinFill<Identity, GasFiller>, NonceFiller>, ChainIdFiller>,
+    JoinFill<
+        JoinFill<JoinFill<JoinFill<Identity, GasFiller>, NonceFiller>, ChainIdFiller>,
+        WalletFiller<EthereumWallet>,
+    >,
     RootProvider<Http<Client>>,
     Http<Client>,
     Ethereum,
@@ -70,7 +83,9 @@ type AlloyProvider = FillProvider<
 lazy_static::lazy_static! {
     static ref PROVIDER: AlloyProvider = {
         let rpc_url = Url::parse(&std::env::var("RPC_URL").unwrap()).unwrap();
-        ProviderBuilder::new().with_recommended_fillers().on_http(rpc_url)
+        let signer = PrivateKeySigner::from_str(&std::env::var("PRIVATE_KEY").unwrap()).unwrap();
+        let ethereum_wallet = EthereumWallet::from(signer);
+        ProviderBuilder::new().with_recommended_fillers().wallet(ethereum_wallet).on_http(rpc_url)
     };
 
     static ref ESCROW_ADDRESS: Address = Address::from_str(&std::env::var("ESCROW_ADDRESS").unwrap()).unwrap();
@@ -90,8 +105,8 @@ async fn get_mongo() -> anyhow::Result<Database> {
     ))
 }
 
-#[post("/submit_proofs", format = "json", data = "<guesses>")]
-async fn submit_proofs(guesses: Json<Guesses>) -> Json<AlignedVerificationData> {
+#[post("/start_game", format = "json", data = "<guesses>")]
+async fn start_game(guesses: Json<Guesses>) -> Json<AlignedVerificationData> {
     // Proof the game and submit the proof
     let serialized_proof =
         sp1::prove_mine_game(guesses.0.guesses.clone()).expect("failed to prove");
@@ -126,8 +141,74 @@ async fn submit_proofs(guesses: Json<Guesses>) -> Json<AlignedVerificationData> 
     Json(aligned_verification_data)
 }
 
-#[get("/game_result/<id>")]
-async fn game_result(id: u128) -> Json<bool> {
+fn settlement_input(
+    id: u128,
+    outcome: bool,
+    verification_data: GameVerificationData,
+) -> Escrow::SettlementInput {
+    let proof_commitment = B256::from(
+        verification_data
+            .data
+            .verification_data_commitment
+            .proof_commitment,
+    );
+    let proof_aux_data_commitment = B256::from(
+        verification_data
+            .data
+            .verification_data_commitment
+            .proving_system_aux_data_commitment,
+    );
+    let proof_generator_addr = Address::from(
+        verification_data
+            .data
+            .verification_data_commitment
+            .proof_generator_addr,
+    );
+    let proof_merkle_root = B256::from(verification_data.data.batch_merkle_root);
+    let proof_merkle_path = Bytes::from(
+        verification_data
+            .data
+            .batch_inclusion_proof
+            .merkle_path
+            .clone()
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>(),
+    );
+
+    // Settle the bet with the outcome
+    Escrow::SettlementInput {
+        gameId: U256::from(id),
+        result: outcome,
+        proofCommitment: vec![proof_commitment],
+        provingSystemAuxDataCommitment: proof_aux_data_commitment,
+        proofGeneratorAddr: *proof_generator_addr,
+        batchMerkleRoot: vec![proof_merkle_root],
+        merkleProof: vec![proof_merkle_path.clone()],
+        verificationDataBatchIndex: vec![U256::from(verification_data.data.index_in_batch)],
+    }
+}
+
+async fn send_settle_bet(
+    id: u128,
+    outcome: bool,
+    verification_data: GameVerificationData,
+) -> anyhow::Result<()> {
+    let batch_inclusion_data = settlement_input(id, outcome, verification_data.clone());
+    let escrow = Escrow::new(*ESCROW_ADDRESS, PROVIDER.clone());
+    let call = escrow.settleBet(batch_inclusion_data.clone());
+    let _ = call
+        .send()
+        .await?
+        .with_required_confirmations(2)
+        .with_timeout(std::time::Duration::from_secs(60).into())
+        .get_receipt()
+        .await?;
+    Ok(())
+}
+
+#[get("/settle_bet/<id>")]
+async fn settle_bet(id: u128) {
     // Fetch the verification data from the MongoDB
     let mongo = get_mongo().await.expect("Failed to get MongoDB");
     let maybe_verification_data = mongo
@@ -136,59 +217,13 @@ async fn game_result(id: u128) -> Json<bool> {
         .await
         .expect("Failed to find verification data in MongoDB");
     if maybe_verification_data.is_none() {
-        return Json(false);
+        return;
     }
     let verification_data = maybe_verification_data.unwrap();
 
-    // Public commit with a true outcome value
-    let bytes = GameCommitment {
-        user_guesses: verification_data.game.guesses,
-        result: true,
-    }
-    .abi_encode();
-    // Hash twice to get the commitment
-    let mut hasher = tiny_keccak::Keccak::v256();
-    hasher.update(&bytes);
-    let mut output = [0; 32];
-    hasher.finalize(&mut output);
-
-    let mut hasher = tiny_keccak::Keccak::v256();
-    hasher.update(&output);
-    let mut pub_commitment = [0; 32];
-    hasher.finalize(&mut pub_commitment);
-
-    // Check if the proof is valid
-    let data = verification_data.data.clone();
-    let escrow = Escrow::new(*ESCROW_ADDRESS, PROVIDER.clone());
-    let res = escrow
-        .verifyBatchInclusion(
-            B256::from_slice(&data.verification_data_commitment.proof_commitment),
-            B256::from_slice(&pub_commitment),
-            B256::from_slice(
-                &data
-                    .verification_data_commitment
-                    .proving_system_aux_data_commitment,
-            ),
-            *Address::from_slice(&data.verification_data_commitment.proof_generator_addr),
-            B256::from_slice(&data.batch_merkle_root),
-            Bytes::from(
-                data.batch_inclusion_proof
-                    .merkle_path
-                    .clone()
-                    .into_iter()
-                    .flatten()
-                    .collect::<Vec<_>>(),
-            ),
-            U256::from(data.index_in_batch),
-        )
-        .call()
-        .await;
-    if res.is_err() {
-        return Json(false);
-    }
-    let outcome = res.unwrap()._0;
-
-    Json(outcome)
+    // Settle the bet with the winning outcome
+    let _ = send_settle_bet(id, true, verification_data.clone()).await;
+    let _ = send_settle_bet(id, false, verification_data).await;
 }
 
 #[launch]
@@ -206,6 +241,6 @@ fn rocket() -> _ {
     });
 
     rocket::build()
-        .mount("/", routes![submit_proofs, game_result])
+        .mount("/", routes![start_game, settle_bet])
         .attach(cors)
 }
