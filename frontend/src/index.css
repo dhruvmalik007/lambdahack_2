@@ -68,12 +68,14 @@ button:hover {
 
 .infoBar {
     /* padding: 8px; */
+    position: relative;
     display: flex;
     justify-content: start;
-    /* align-items: center; */
+    align-items: center;
     /* min-width: 512px; */
     flex-direction: column-reverse;
     width: 7.4em;
+    left: -0.6em;
 }
 
 footer {
