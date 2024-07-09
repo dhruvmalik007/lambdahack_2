@@ -7,6 +7,8 @@ import AudioPlayer from "../components/audioPlayer";
 import { ClockIcon, DownArrowIcon, MusicIcon, RestartIcon } from "../components/icons";
 import "../App.css";
 import { getTest } from "../services/apiCalls";
+import { walletService } from "../services/walletService";
+import { WalletService } from "../services/wallet";
 
 const jsConfetti = new JSConfetti();
 const initialMute = localStorage.getItem("muted") === null ? true : localStorage.getItem("muted") === "true";
@@ -86,6 +88,8 @@ const Game = () => {
     const sendBet = async () => {
         const positivefeedback = document.getElementById("positivefeedback")
         const negativefeedback = document.getElementById("negativefeedback")
+        const bet = console.log(localStorage.getItem("bet"))
+        const response = await walletService.callContract('startGame', bet)
         if (Math.random() < 0.2) {
 
             const jsConfetti = new JSConfetti();
@@ -132,7 +136,7 @@ const Game = () => {
                     <br />
                     <br />
                     <br />
-                    <button id="betButton" ref={restartBtn} onClick={() => {
+                    <button id="betButton" onClick={() => {
                         sendBet()
                         restartBtn.current?.click()
                         setState("waiting");

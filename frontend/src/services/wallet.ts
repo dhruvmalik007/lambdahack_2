@@ -28,7 +28,7 @@ export class WalletService {
     }
 
     // define a method to do the transaction
-    public async callContract(functionName: string, callData: string[][]): Promise<boolean> {
+    public async callContract(functionName: string, callData: any): Promise<boolean> {
         if (!this.signer) {
             throw new Error('Please connect to the wallet first');
         }
