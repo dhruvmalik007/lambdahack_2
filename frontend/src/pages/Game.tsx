@@ -99,7 +99,7 @@ const Game = () => {
     const sendBet = async () => {
         const positivefeedback = document.getElementById('positivefeedback');
         const negativefeedback = document.getElementById('negativefeedback');
-        if (Math.random() < 0.3) {
+        if (Math.random() < 0.2) {
             const jsConfetti = new JSConfetti();
             for (let i = 0; i < 6; i++) {
                 positivefeedback.innerHTML == 'WIN'
@@ -125,8 +125,10 @@ const Game = () => {
             <div className="App">
                 <div className="infoBar">
                     <button
-                        ref={restartBtn}
+                        id="restart"
                         onClick={() => {
+                            console.log('clicked');
+                            restartBtn.current?.click();
                             setState('waiting');
                             setUI({ time: 0, flags: difficulty.mines });
                             localStorage.setItem('isRestart', true.toString());
@@ -144,9 +146,11 @@ const Game = () => {
                     <br />
                     <br />
                     <button
+                        id="betButton"
                         ref={restartBtn}
                         onClick={() => {
                             sendBet();
+                            restartBtn.current?.click();
                             setState('waiting');
                             setUI({ time: 0, flags: difficulty.mines });
                             localStorage.setItem('isRestart', true.toString());

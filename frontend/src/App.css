@@ -111,7 +111,7 @@
 	position: fixed;
 	display: flex;
 	color: rgba(0, 196, 0, 0.708);
-	font-size: 100vh;
+	font-size: 50vw;
 	justify-content: center;
 	align-items: center;
 	z-index: 11;
@@ -123,10 +123,12 @@
 	position: fixed;
 	display: flex;
 	color: rgba(208, 0, 0, 0.708);
-	font-size: 80vh;
+	font-size: 37vw;
 	justify-content: center;
 	align-items: center;
 	z-index: 11;
 	height: 100%;
 	user-select: none;
 }
+
+.restart {}
