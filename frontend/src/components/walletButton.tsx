@@ -43,11 +43,9 @@ const WalletButton: React.FC = () => {
             return;
         }
 
-        try {
-            const client = createClient({
-                chain: holesky,
-                transport: http(),
-            });
+        walletService.connectWallet()
+
+    }
 
             // Use the properly defined Holesky network object here
             const provider = new ethers.BrowserProvider(
