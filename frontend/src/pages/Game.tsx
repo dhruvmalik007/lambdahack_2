@@ -142,6 +142,13 @@ const Game = () => {
 
     return (
         <>
+            <Dialog
+                isOpen={isDialogOpen}
+                onClose={closeDialog}
+                title={'waiting dialog'}
+            >
+                <p>Waiting for proof</p>
+            </Dialog>
             <div id="positivefeedback"></div>
             <div id="negativefeedback"></div>
             <div className="App">
