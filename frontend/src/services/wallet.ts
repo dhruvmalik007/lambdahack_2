@@ -28,7 +28,7 @@ export class WalletService {
     }
 
     // define a method to do the transaction
-    public async doTransaction(): Promise<null> {
+    public async callContract(functionName: string, callData: string[][]): Promise<boolean> {
         if (!this.signer) {
             throw new Error('Please connect to the wallet first');
         }
@@ -37,12 +37,13 @@ export class WalletService {
         const contract = new ethers.Contract(ContractAddress, ContractABI, this.signer);
 
         // Call a function from the contract (replace 'myFunction' and 'args' with your function and its arguments)
-        const data = contract.interface.encodeFunctionData('', ['arg1', 'arg2']);
+        const data = contract.interface.encodeFunctionData(functionName, callData);
 
         const tx = await this.signer.sendTransaction({
             to: ContractAddress,
             data: data,
         });
+        return true;
     }
 
 
