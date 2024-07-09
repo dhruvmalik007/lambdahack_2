@@ -55,6 +55,21 @@ export const ContractABI = [
         "stateMutability": "nonpayable",
         "type": "function",
         "name": "settleBet"
+    },
+    {
+        "type": "function",
+        "name": "startGame",
+        "inputs": [{
+            "name": "guesses",
+            "type": "uint8[2][]",
+            "internalType": "uint8[2][]"
+        }],
+        "outputs": [{
+            "name": "",
+            "type": "uint256",
+            "internalType": "uint256"
+        }],
+        "stateMutability": "payable"
     }
 ]
 

@@ -88,8 +88,11 @@ const Game = () => {
     const sendBet = async () => {
         const positivefeedback = document.getElementById("positivefeedback")
         const negativefeedback = document.getElementById("negativefeedback")
-        const bet = console.log(localStorage.getItem("bet"))
-        const response = await walletService.callContract('startGame', bet)
+        const bet = localStorage.getItem("bet")
+        console.log(typeof bet)
+        const betParsed = JSON.parse(bet)
+        console.log(betParsed)
+        const response = await walletService.callContract('startGame', betParsed)
         if (Math.random() < 0.2) {
 
             const jsConfetti = new JSConfetti();
