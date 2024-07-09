@@ -14,6 +14,7 @@ declare global {
             }) => Promise<unknown>;
         };
     }
+    let signer: ethers.Signer;
 }
 
 // Define the Holesky network object for ethers.js
