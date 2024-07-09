@@ -106,7 +106,7 @@ async fn get_mongo() -> anyhow::Result<Database> {
 }
 
 #[post("/start_game", format = "json", data = "<guesses>")]
-async fn start_game(guesses: Json<Guesses>) -> Json<AlignedVerificationData> {
+async fn start_game(guesses: Json<Guesses>) -> Json<bool> {
     // Proof the game and submit the proof
     let serialized_proof =
         sp1::prove_mine_game(guesses.0.guesses.clone()).expect("failed to prove");
@@ -138,7 +138,7 @@ async fn start_game(guesses: Json<Guesses>) -> Json<AlignedVerificationData> {
         .await
         .expect("Failed to insert verification data into MongoDB");
 
-    Json(aligned_verification_data)
+    Json(true)
 }
 
 fn settlement_input(
