@@ -34,7 +34,6 @@ const WalletButton: React.FC = () => {
 
     const handleTransaction = async () => {
         setIsLoading(true);
-
         if (!window.ethereum) {
             alert(
                 'Please install MetaMask or another Ethereum wallet extension'
@@ -42,9 +41,8 @@ const WalletButton: React.FC = () => {
             setIsLoading(false);
             return;
         }
-
-        walletService.connectWallet()
-
+        await walletService.connectWallet()
+        navigate('/app');
     }
 
             // Use the properly defined Holesky network object here
