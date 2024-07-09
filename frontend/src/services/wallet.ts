@@ -1,9 +1,9 @@
 import { ethers } from 'ethers';
-import {ContractABI, ContractAddress} from "./contract";
+import { ContractABI, ContractAddress } from "./contract";
 
 // define a class of wallet service
 
-const ETH_RPC_URL = process.env.ETH_RPC_URL || 'https://ethereum-holesky-rpc.publicnode.com' ;
+const ETH_RPC_URL = /*process.env.ETH_RPC_URL || */'https://ethereum-holesky-rpc.publicnode.com';
 
 export class WalletService {
     // define the network object
@@ -38,12 +38,13 @@ export class WalletService {
         const contract = new ethers.Contract(ContractAddress, ContractABI, this.signer);
 
         // Call a function from the contract (replace 'myFunction' and 'args' with your function and its arguments)
-        const data = contract.interface.encodeFunctionData('', ['arg1', 'arg2', ...]);
+        const data = contract.interface.encodeFunctionData('', ['arg1', 'arg2']);
 
         const tx = await this.signer.sendTransaction({
             to: ContractAddress,
             data: data,
         });
+    }
+
+
 }
-
-

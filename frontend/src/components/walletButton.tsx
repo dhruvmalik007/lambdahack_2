@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createClient, http } from 'viem';
 import { ethers } from 'ethers';
 import { holesky } from 'viem/chains'; // Ensure this import is correct
-import {walletService} from "../services/walletService";
+import { walletService } from "../services/walletService";
 
 declare global {
     interface Window {
@@ -35,28 +35,14 @@ const WalletButton: React.FC = () => {
             return;
         }
 
-        try {
-            const client = createClient({
-                chain: holesky,
-                transport: http(),
-            });
+        walletService.connectWallet()
 
-            // Use the properly defined Holesky network object here
-            const provider = new ethers.BrowserProvider(window.ethereum, holeskyNetwork);
-            signer = await provider.getSigner();
-            alert('Connected to Holesky testnet');
-            navigate('/app');
-        } catch (error) {
-            console.error('Transaction failed:', error);
-            alert('Transaction failed. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    }
+
 
     return (
         <div className='login'>
-            <button onClick={} disabled={isLoading} >
+            <button onClick={() => handleTransaction()} disabled={isLoading} >
                 {isLoading ? 'Processing...' : 'Login'}
             </button>
         </div>
