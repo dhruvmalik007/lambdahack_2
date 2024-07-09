@@ -28,18 +28,14 @@ const WalletButton: React.FC = () => {
 
     const handleTransaction = async () => {
         setIsLoading(true);
-
         if (!window.ethereum) {
             alert('Please install MetaMask or another Ethereum wallet extension');
             setIsLoading(false);
             return;
         }
-
-        walletService.connectWallet()
-
+        await walletService.connectWallet()
+        navigate('/app');
     }
-
-
     return (
         <div className='login'>
             <button onClick={() => handleTransaction()} disabled={isLoading} >

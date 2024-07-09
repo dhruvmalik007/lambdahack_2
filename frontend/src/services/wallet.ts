@@ -15,17 +15,16 @@ export class WalletService {
     private signer: ethers.Signer;
 
     // define a method to connect to the wallet
-    public async connectWallet(): Promise<null> {
+    public async connectWallet(): Promise<boolean> {
         if (!window.ethereum) {
             throw new Error('Please install MetaMask or another Ethereum wallet extension');
         }
 
         // Use the properly defined Holesky network object here
         const provider = new ethers.BrowserProvider(window.ethereum, this.network);
-
         // set the signer
         this.signer = await provider.getSigner();
-        return null;
+        return true;
     }
 
     // define a method to do the transaction
