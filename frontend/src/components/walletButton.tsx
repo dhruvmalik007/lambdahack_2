@@ -11,6 +11,7 @@ declare global {
             request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown>;
         };
     }
+    let signer: ethers.Signer;
 }
 
 // Define the Holesky network object for ethers.js
@@ -41,7 +42,7 @@ const WalletButton: React.FC = () => {
 
             // Use the properly defined Holesky network object here
             const provider = new ethers.BrowserProvider(window.ethereum, holeskyNetwork);
-            const signer = await provider.getSigner();
+            signer = await provider.getSigner();
             alert('Connected to Holesky testnet');
             navigate('/app');
         } catch (error) {
