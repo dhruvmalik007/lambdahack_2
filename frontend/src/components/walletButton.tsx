@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createClient, http } from 'viem';
 import { ethers } from 'ethers';
 import { holesky } from 'viem/chains'; // Ensure this import is correct
+import { walletService } from '../services/walletService';
 
 declare global {
     interface Window {

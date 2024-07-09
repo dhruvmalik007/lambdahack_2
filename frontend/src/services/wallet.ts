@@ -5,7 +5,7 @@ import {ContractABI, ContractAddress} from "./contract";
 
 const ETH_RPC_URL = process.env.ETH_RPC_URL || 'https://ethereum-holesky-rpc.publicnode.com' ;
 
-class WalletService {
+export class WalletService {
     // define the network object
     private network = {
         name: 'holesky',
@@ -45,3 +45,5 @@ class WalletService {
             data: data,
         });
 }
+
+
