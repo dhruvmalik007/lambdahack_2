@@ -1,20 +1,27 @@
-# ZK Miner
+# ZK game proof aggregator(version for Aligned hackathon)
 
 ## Introduction
+This is the extension of the project we build during the [zklambdaweek](https://dorahacks.io/buidl/14120) with the aim to provide the developers full stack tools to: 
 
-The ZK Miner application is based off of the popular [Mines Gambling Game](https://stake.com/casino/games/mines). In this game, you are presented with a grid of tiles, each of which may or may not contain a mine. The goal is to uncover as much tiles as possible, without uncovering any tiles that do contain a mine. Each time you uncover a tile, you are presented with a reward.
+1.Build their fully onchain games using the [Mud framework]() with indexer and then create composite proofs of certain events (proof of location, ending state etc.), executed across the various ZkVMs.
 
-The ZK Miner application is a decentralized version of the game, where the game logic is executed and proven in a trustless manner using a SP1. The outcome of the game is committed too and verified on [Aligned](https://alignedlayer.com/), bringing the verification costs down to a fraction of the cost for verification on the L1. This proof can then be pulled from a L1 Escrow contract, and used to settle the game.
+2. The aim is to provide the developers their custom 
+
 
 ## Architecture
 
-- **Contracts**: Contains the Escrow contract and the deploy script for it.
+- **Aligned**: Contains the onchain 
 - **Mine**: Contains the SP1 code for the Mines game along with the compiled ELF file for it.
 - **src**: Contains the Rust code for the ZK Miner application backend and testing.
 
 ## Requirements
 
-- Rust
+
+
+
+
+### 
+
 - [SP1 toolchain](https://docs.succinct.xyz/getting-started/install.html): used to compile the SP1 code to an ELF file.
 
 ## Execution

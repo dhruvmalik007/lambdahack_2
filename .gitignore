@@ -17,3 +17,15 @@ pgo-data.profdata
 
 # Env
 .env
+
+
+node_modules
+
+# mud artifacts
+.mud
+# sqlite indexer data
+*.db
+*.db-journal
+
+
+frontend_ancien

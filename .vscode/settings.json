@@ -3,6 +3,7 @@
         "mine/Cargo.toml",
         "./Cargo.toml"
     ],
+    "typescript.tsdk": "node_modules/typescript/lib",
     "rust-analyzer.check.overrideCommand": [
         "cargo",
         "clippy",

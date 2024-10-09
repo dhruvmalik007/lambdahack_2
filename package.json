@@ -1,0 +1,13 @@
+{
+  "name": "onchain_mud_template",
+  "private": true,
+  "scripts": {
+  
+  },
+  "devDependencies": {
+  
+  },
+  "engines": {
+    "pnpm": "^8 || ^9"
+  }
+}
